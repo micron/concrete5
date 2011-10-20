@@ -7,7 +7,7 @@ $nav = AutonavBlockController::getChildPages($dashboard);
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<html lang="<?=LANGUAGE?>" xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <?
 $html = Loader::helper('html');
@@ -229,7 +229,7 @@ foreach($nav as $n2) {
 	}
 	
 	if (isset($message)) { ?>
-		<div class="message success"><?=$message?></div>
+		<div class="message success"><?=Loader::helper('text')->entities($message)?></div>
 	<? } ?>
 	
 	<?php print $innerContent; ?>

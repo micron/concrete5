@@ -150,13 +150,15 @@ cvID                     INTEGER(10) UNSIGNED NOT NULL DEFAULT 1,
 bID                      INTEGER(10) UNSIGNED NOT NULL DEFAULT 0,
 arHandle                 VARCHAR(255) NOT NULL,
 cbDisplayOrder           INTEGER(10) UNSIGNED NOT NULL DEFAULT 0,
-isOriginal               VARCHAR(1) NOT NULL DEFAULT '0',
+isOriginal               TINYINT(1) NOT NULL DEFAULT '0',
 cbOverrideAreaPermissions TINYINT(1) NOT NULL DEFAULT 0,
 cbIncludeAll             TINYINT(1) NOT NULL DEFAULT 0,
                  PRIMARY KEY (cID, cvID, bID, arHandle)
 );
 
 ALTER TABLE CollectionVersionBlocks ADD  INDEX cbIncludeAll  (cbIncludeAll);
+
+ALTER TABLE CollectionVersionBlocks ADD  INDEX isOriginal  (isOriginal);
 
 CREATE TABLE CollectionVersionBlockStyles (
 cID                      INTEGER(10) UNSIGNED NOT NULL DEFAULT 0,
@@ -192,7 +194,7 @@ CREATE TABLE CollectionVersions (
 cID                      INTEGER(10) UNSIGNED NOT NULL DEFAULT 0,
 cvID                     INTEGER(10) UNSIGNED NOT NULL DEFAULT 1,
 cvName                   TEXT,
-cvHandle                 VARCHAR(64),
+cvHandle                 VARCHAR(255),
 cvDescription            TEXT,
 cvDatePublic             DATETIME,
 cvDateCreated            DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
@@ -611,7 +613,7 @@ ctComposerPublishPageParentID INTEGER(10) UNSIGNED NOT NULL DEFAULT 0,
 CREATE TABLE Pages (
 cID                      INTEGER(10) UNSIGNED NOT NULL DEFAULT 0,
 ctID                     INTEGER(10) UNSIGNED NOT NULL DEFAULT 0,
-cIsTemplate              VARCHAR(1) NOT NULL DEFAULT '0',
+cIsTemplate              TINYINT(1) NOT NULL DEFAULT '0',
 uID                      INTEGER(10) UNSIGNED,
 cIsCheckedOut            TINYINT(1) NOT NULL DEFAULT 0,
 cCheckedOutUID           INTEGER(10) UNSIGNED,
@@ -648,6 +650,8 @@ ALTER TABLE Pages ADD  INDEX cPointerID  (cPointerID);
 ALTER TABLE Pages ADD  INDEX uID  (uID);
 
 ALTER TABLE Pages ADD  INDEX ctID  (ctID);
+
+ALTER TABLE Pages ADD INDEX cIsTemplate (cIsTemplate);
 
 CREATE TABLE PileContents (
 pcID                     INTEGER(10) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -1120,6 +1124,7 @@ fOnstateID               INTEGER UNSIGNED DEFAULT 0,
 maxWidth                 INTEGER UNSIGNED DEFAULT 0,
 maxHeight                INTEGER UNSIGNED DEFAULT 0,
 externalLink             VARCHAR(255),
+internalLinkCID          INTEGER UNSIGNED DEFAULT 0,
 altText                  VARCHAR(255),
                  PRIMARY KEY (bID)
 );
@@ -1250,11 +1255,14 @@ height                   INTEGER UNSIGNED,
                  PRIMARY KEY (bID)
 );
 
-CREATE TABLE btYouTube (
-bID                      INTEGER UNSIGNED NOT NULL,
-title                    VARCHAR(255),
-videoURL                 VARCHAR(255),
-                 PRIMARY KEY (bID)
+CREATE TABLE `btYouTube` (
+  `bID` int(10) unsigned NOT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `videoURL` varchar(255) DEFAULT NULL,
+  `vHeight` varchar(255) DEFAULT NULL,
+  `vWidth` varchar(255) DEFAULT NULL,
+  `vPlayer` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`bID`)
 );
 
 CREATE TABLE IF NOT EXISTS `CollectionSearchIndexAttributes` (
