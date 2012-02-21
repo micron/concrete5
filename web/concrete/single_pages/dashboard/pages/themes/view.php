@@ -25,22 +25,15 @@ $alreadyActiveMessage = t('This theme is currently active on your site.');
         <div class="alert-message block-message error" style="margin-bottom:0px;">
             
             <h5>
-                <strong><?=t('Are you sure you want to activate this theme?')?></strong>
+                <strong><?=t('Apply this theme to every page on your site?')?></strong>
             </h5>
-    
-            <p>
-                <em><?=t('Any custom theme selections across your site will be reset.')?></em>
-            </p>
-            
-            <div class="alert-actions clearfix" style="margin-top:15px;">
-                <?=$bt->button(t("Yes, activate this theme."), $activate_confirm, 'left', 'primary');?>            
-            </div>
             
         </div>
     
     </div>
     
     <div class="ccm-pane-footer">
+        <?=$bt->button(t("Ok"), $activate_confirm, 'right', 'primary');?>            
     	<?=$bt->button(t('Cancel'), $this->url('/dashboard/pages/themes/'), 'left');?>
     </div>
     
@@ -154,8 +147,9 @@ $alreadyActiveMessage = t('This theme is currently active on your site.');
     <? if (ENABLE_MARKETPLACE_SUPPORT == true) { ?>
 
 	<div class="well" style="padding:10px 20px;">
-        <h3><?=t('Looking for more themes?')?></h3>
-        <p><a href="<?=$this->url('/dashboard/extend/themes')?>"><?=t("Download more themes from the concrete5.org marketplace.")?></a></p>
+        <h3><?=t('Want more themes?')?></h3>
+        <p><?=t('You can download themes and add-ons from the concrete5 marketplace.')?></p>
+        <p><a class="btn success" href="<?=$this->url('/dashboard/extend/themes')?>"><?=t("Get More Themes")?></a></p>
     </div>
     
     <? } ?>

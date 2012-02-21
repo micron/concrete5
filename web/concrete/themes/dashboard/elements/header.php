@@ -36,6 +36,7 @@ if (!isset($enableEditing) || $enableEditing == false) {
 $v->addFooterItem($html->javascript('jquery.backstretch.js'));
 $v->addFooterItem($html->javascript('jquery.ui.js'));
 $v->addFooterItem($html->javascript('jquery.form.js'));
+$v->addFooterItem($html->javascript('jquery.rating.js'));
 $v->addFooterItem('<script type="text/javascript" src="' . REL_DIR_FILES_TOOLS_REQUIRED . '/i18n_js"></script>'); 
 $v->addFooterItem($html->javascript('ccm.app.js'));
 $v->addFooterItem(Loader::helper('html')->javascript('tiny_mce/tiny_mce.js'));
@@ -60,32 +61,18 @@ if ($dashboard->getCollectionID() == $c->getCollectionID()) {
 $disp .= "</script>"."\n";
 //require(DIR_FILES_ELEMENTS_CORE . '/header_required.php'); 
 $v->addHeaderItem($disp);
-
 Loader::element('header_required');
-
 $backgroundImage = Loader::helper('concrete/dashboard')->getDashboardBackgroundImage();
 ?>
 
 <script type="text/javascript">
 	$(function() {
-	    $.backstretch("<?=$backgroundImage->image?>" <? if (!$_SESSION['dashboardHasSeenImage']) { ?>,  {speed: 750}<? } ?>);
+		<? if ($backgroundImage->image) { ?>
+		    $.backstretch("<?=$backgroundImage->image?>" <? if (!$_SESSION['dashboardHasSeenImage']) { ?>,  {speed: 750}<? } ?>);
+	    <? } ?>
 	    <? if ($backgroundImage->checkData) { ?>
-		    ccm_getDashboardBackgroundImageData('<?=$backgroundImage->filename?>');
+		    ccm_getDashboardBackgroundImageData('<?=$backgroundImage->filename?>', <? if ($backgroundImage->displayCaption) { ?> true <? } else { ?> false <? } ?>);
 		<? } ?>
-	    ccm_activateToolbar();
-	    ccm_activateDashboardBreadcrumbHover();
-	    $("#ccm-page-help").popover({placement: 'below', html: true, trigger: 'manual'});
-	    $('.tooltip').twipsy({placement: 'below'});
-	    if ($('#ccm-dashboard-result-message').length > 0) { 
-			if ($('.ccm-pane').length > 0) { 
-				var pclass = $('.ccm-pane').parent().attr('class');
-				var gpclass = $('.ccm-pane').parent().parent().attr('class');
-				var html = $('#ccm-dashboard-result-message').html();
-				$('#ccm-dashboard-result-message').html('<div class="' + gpclass + '"><div class="' + pclass + '">' + html + '</div></div>').fadeIn(400);
-			}
-	    } else {
-	    	$("#ccm-dashboard-result-message").fadeIn(200);
-	    }
 	});
 </script>
 
@@ -104,7 +91,7 @@ $backgroundImage = Loader::helper('concrete/dashboard')->getDashboardBackgroundI
 
 <div id="ccm-toolbar">
 <ul id="ccm-main-nav">
-<li id="ccm-logo-wrapper"><a href="<?=$this->url('/dashboard/')?>"><?=Loader::helper('concrete/interface')->getToolbarLogoSRC()?></a></li>
+<li id="ccm-logo-wrapper"><?=Loader::helper('concrete/interface')->getToolbarLogoSRC()?></li>
 <li><a class="ccm-icon-back ccm-menu-icon" href="<?=$this->url('/')?>"><?=t('Return to Website')?></a></li>
 <? if (Loader::helper('concrete/interface')->showWhiteLabelMessage()) { ?>
 	<li id="ccm-white-label-message"><?=t('Powered by <a href="%s">concrete5</a>.', CONCRETE5_ORG_URL)?></li>

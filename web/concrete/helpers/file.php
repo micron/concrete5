@@ -32,22 +32,14 @@ class FileHelper {
 		$this->ignoreFiles = array('__MACOSX', DIRNAME_CONTROLLERS);
 	}
 	
-	/** 
-	 * Returns the contents of a directory in an array.
-	 * @param string $directory Directory to get the contents of
-	 * @param array $ignoreFilesArray File names to not include when getting the directory contents
-	 * @return array
-	 */
 	public function getDirectoryContents($dir, $ignoreFilesArray = array()) {
 		$this->ignoreFiles = array_merge($this->ignoreFiles, $ignoreFilesArray);
 		$aDir = array();
 		if (is_dir($dir)) {
 			$handle = opendir($dir);
-			if($handle) {
-				while(($file = readdir($handle)) !== false) {
-					if (substr($file, 0, 1) != '.' && (!in_array($file, $this->ignoreFiles))) {
-						$aDir[] = $file;
-					}
+			while(($file = readdir($handle)) !== false) {
+				if (substr($file, 0, 1) != '.' && (!in_array($file, $this->ignoreFiles))) {
+					$aDir[] = $file;
 				}
 			}
 		}
@@ -71,7 +63,7 @@ class FileHelper {
 	 * @param string $target Place to copy the source
 	 * @param int $mode What to chmod the file to
 	 */
-	public function copyAll($source, $target, $mode = 0777) {
+	public function copyAll($source, $target, $mode = FILE_PERMISSIONS_MODE) {
 		if (is_dir($source)) {
 			@mkdir($target, $mode);
 			@chmod($target, $mode);
@@ -147,7 +139,8 @@ class FileHelper {
 	 */
 	public function getTemporaryDirectory() {
 		if (!is_dir(DIR_TMP)) {
-			mkdir(DIR_TMP, 0777);
+			mkdir(DIR_TMP, FILE_PERMISSIONS_MODE);
+			chmod(DIR_TMP, FILE_PERMISSIONS_MODE);
 			touch(DIR_TMP . '/index.html');
 		}
 		return DIR_TMP;
@@ -190,6 +183,7 @@ class FileHelper {
 				curl_setopt($curl_handle, CURLOPT_URL, $file);
 				curl_setopt($curl_handle, CURLOPT_CONNECTTIMEOUT, $timeout);
 				curl_setopt($curl_handle, CURLOPT_RETURNTRANSFER, 1);
+				curl_setopt($curl_handle, CURLOPT_SSL_VERIFYPEER, false);
 				$contents = curl_exec($curl_handle);
 				$http_code = curl_getinfo($curl_handle, CURLINFO_HTTP_CODE);
 				if ($http_code == 404) {	

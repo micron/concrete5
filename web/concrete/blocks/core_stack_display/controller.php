@@ -17,6 +17,20 @@
 		public function getOriginalBlockID() {
 			return $this->bOriginalID;
 		}
+
+		public function getImportData($blockNode) {
+			$args = array();
+			$content = (string) $blockNode->stack;
+			$stack = Stack::getByName($content);
+			$args['stID'] = $stack->getCollectionID();			
+			return $args;		
+		}
+		
+		public function export(SimpleXMLElement $blockNode) {			
+			$stack = Stack::getByID($this->stID);
+			$blockNode->addChild('stack', '<![CDATA[' . $stack->getCollectionName() . ']]>');
+			
+		}
 		
 		public function on_page_view() {
 			$stack = Stack::getByID($this->stID);
@@ -29,6 +43,11 @@
 						$btc = $b->getInstance();
 						if('Controller' != get_class($btc)){
 							$btc->outputAutoHeaderItems();
+						}
+						$csr = $b->getBlockCustomStyleRule();
+						if (is_object($csr)) {
+							$styleHeader = '#'.$csr->getCustomStyleRuleCSSID(1).' {'. $csr->getCustomStyleRuleText(). "} \r\n";  
+							$btc->addHeaderItem("<style type=\"text/css\"> \r\n".$styleHeader.'</style>', 'VIEW');
 						}
 						$btc->runTask('on_page_view', array($view));
 					}

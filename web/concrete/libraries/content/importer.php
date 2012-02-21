@@ -43,6 +43,7 @@ class ContentImporter {
 		$this->importPageContent($sx);
 		$this->importPackages($sx);
 		$this->importConfigValues($sx);
+		$this->importSystemCaptchaLibraries($sx);
 	}
 	
 	protected static function getPackageObject($pkgHandle) {
@@ -83,11 +84,13 @@ class ContentImporter {
 			foreach($sx->singlepages->page as $p) {
 				$pkg = ContentImporter::getPackageObject($p['package']);
 				$spl = SinglePage::add($p['path'], $pkg);
-				if (isset($p['root']) && $p['root'] == true) {
-					$spl->moveToRoot();
-				}
-				if ($p['name']) {
-					$spl->update(array('cName' => $p['name'], 'cDescription' => $p['description']));
+				if (is_object($spl)) { 
+					if (isset($p['root']) && $p['root'] == true) {
+						$spl->moveToRoot();
+					}
+					if ($p['name']) {
+						$spl->update(array('cName' => $p['name'], 'cDescription' => $p['description']));
+					}
 				}
 			}
 		}
@@ -140,6 +143,7 @@ class ContentImporter {
 						$page->setAttribute((string) $attr['handle'], $ak->getController()->importValue($attr));
 					}
 				}
+				$page->reindex();
 			}
 		}
 	}
@@ -227,11 +231,15 @@ class ContentImporter {
 		if (isset($sx->pagetypes)) {
 			foreach($sx->pagetypes->pagetype as $ct) {
 				$pkg = ContentImporter::getPackageObject($ct['package']);
-				$ctr = CollectionType::add(array(
-					'ctHandle' => $ct['handle'],
-					'ctName' => $ct['name'],
-					'ctIsInternal' => (string) $ct['internal']
-				), $pkg);
+				$ctt = CollectionType::getByHandle($ct['handle']);
+				if (!is_object($ctt)) { 
+					$ctr = CollectionType::add(array(
+						'ctHandle' => $ct['handle'],
+						'ctName' => $ct['name'],
+						'ctIcon' => $ct['icon'],
+						'ctIsInternal' => (string) $ct['internal']
+					), $pkg);
+				}
 			}
 		}
 	}
@@ -319,6 +327,19 @@ class ContentImporter {
 		}
 	}
 
+	protected function importSystemCaptchaLibraries(SimpleXMLElement $sx) {
+		if (isset($sx->systemcaptcha)) {
+			Loader::model('system/captcha/library');
+			foreach($sx->systemcaptcha->library as $th) {
+				$pkg = ContentImporter::getPackageObject($th['package']);
+				$scl = SystemCaptchaLibrary::add($th['handle'], $th['name'], $pkg);
+				if ($th['activated'] == '1') {
+					$scl->activate();
+				}
+			}
+		}
+	}
+
 	protected function importJobs(SimpleXMLElement $sx) {
 		Loader::model('job');
 		if (isset($sx->jobs)) {
@@ -351,7 +372,7 @@ class ContentImporter {
 	protected function importTaskPermissions(SimpleXMLElement $sx) {
 		if (isset($sx->taskpermissions)) {
 			foreach($sx->taskpermissions->taskpermission as $tp) {
-				$pkg = ContentImporter::getPackageObject($at['package']);
+				$pkg = ContentImporter::getPackageObject($tp['package']);
 				$tpa = TaskPermission::addTask($tp['handle'], $tp['name'], $tp['description'], $pkg);
 				if (isset($tp->access)) {
 					foreach($tp->access->children() as $ch) {

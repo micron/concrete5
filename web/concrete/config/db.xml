@@ -79,6 +79,9 @@
     <index name="arIsGlobal">
       <col>arIsGlobal</col>
     </index>
+    <index name="cID">
+      <col>cID</col>
+    </index>
     <index name="arHandle">
       <col>arHandle</col>
     </index>
@@ -1215,7 +1218,36 @@
 		  <col>layoutID</col>
 		</index>				
   </table>  
-  
+<table name="SystemAntispamLibraries">
+    <field name="saslHandle" type="C" size="64">
+      <KEY/>
+    </field>
+    <field name="saslName" type="C" size="255"/>
+    <field name="saslIsActive" type="I" size="1">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="pkgID" type="I" size="10">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+      <UNSIGNED/>
+    </field>
+  </table>
+  <table name="SystemCaptchaLibraries">
+    <field name="sclHandle" type="C" size="64">
+      <KEY/>
+    </field>
+    <field name="sclName" type="C" size="255"/>
+    <field name="sclIsActive" type="I" size="1">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+    </field>
+    <field name="pkgID" type="I" size="10">
+      <NOTNULL/>
+      <DEFAULT value="0"/>
+      <UNSIGNED/>
+    </field>
+  </table>  
 <table name="SystemNotifications">
     <field name="snID" type="I" size="10">
       <KEY/>
@@ -1937,6 +1969,9 @@
    <field name="pkgID" type="I" size="10">
       <UNSIGNED />
     </field>
+	<field name="miConnectionMethod" type="C" size="8">
+		<default value="POP" />
+	</field>
   </table>
   <table name="MailValidationHashes">
     <field name="mvhID" type="I" size="10">

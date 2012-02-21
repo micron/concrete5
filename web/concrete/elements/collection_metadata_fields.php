@@ -24,12 +24,10 @@ $usedKeysCombined = array_merge($requiredKeys, $usedKeys);
 	<h6><?=t("All Attributes")?></h6>
 	<div class="ccm-block-type-search-wrapper ">
 
-		<form onsubmit="return ccmPageAttributeSearchFormCheckResults()">
 		<div class="ccm-block-type-search">
 		<?=$form->text('ccmSearchAttributeListField', array('tabindex' => 1, 'autocomplete' => 'off', 'style' => 'width: 155px'))?>
 		</div>
 		
-		</form>
 	</div>
 	
 	<?
@@ -105,7 +103,6 @@ $usedKeysCombined = array_merge($requiredKeys, $usedKeys);
 	
 	<script type="text/javascript">
 	<? 
-	/*
 	$v = View::getInstance();
 	$headerItems = $v->getHeaderItems();
 	foreach($headerItems as $item) {
@@ -117,7 +114,6 @@ $usedKeysCombined = array_merge($requiredKeys, $usedKeys);
 		 ccm_addHeaderItem("<?=$item->file?>", '<?=$type?>');
 		<? 
 	} 
-	*/
 	?>
 	</script>
 	
@@ -228,7 +224,7 @@ var ccmPathHelper={
 				this.value = "";
 			}
 		});
-    	$(field).replaceWith('<a href="javascript:void(0)" class="ccm-meta-path-del">Remove Path</a>');
+    	$(field).replaceWith('<a href="javascript:void(0)" class="ccm-meta-path-del"><?php echo t('Remove Path')?></a>');
 		clone.appendTo(parent.parent());
 
 		$("a.ccm-meta-path-add,a.ccm-meta-path.del").unbind('click');
@@ -261,6 +257,15 @@ $(function() {
 
 	$("a.ccm-meta-path-add").click(function(ev) { ccmPathHelper.add(ev.target) });
 	$("a.ccm-meta-path-del").click(function(ev) { ccmPathHelper.del(ev.target) });
+
+	$("#cHandle").blur(function() {
+		var oldCHandle = $("#oldCHandle").val();
+		$(".ccm-meta-path input").each(function() {
+			if ($(this).val() == "") {
+				$(this).val(oldCHandle);
+			}
+		});
+	});
 
 });
 

@@ -175,6 +175,7 @@ class Package extends Object {
 	const E_PACKAGE_UNZIP = 6;
 	const E_PACKAGE_INSTALL = 7;
 	const E_PACKAGE_MIGRATE_BACKUP = 8;
+	const E_PACKAGE_INVALID_APP_VERSION = 20;
 
 	protected $errorText = array();
 
@@ -248,12 +249,26 @@ class Package extends Object {
 	
 	}
 	
-	public function setupPackageLocalization() {
+	/**
+	 * Loads package translation files into zend translate 
+	 * @param string $locale
+	 * @param string $key
+	 * @return void
+	*/
+	public function setupPackageLocalization($locale = NULL, $key = NULL) {
 		$translate = Localization::getTranslate();
 		if (is_object($translate)) {
 			$path = $this->getPackagePath() . '/' . DIRNAME_LANGUAGES;
-			if (file_exists($path . '/' . ACTIVE_LOCALE . '/LC_MESSAGES/messages.mo')) {
-				$translate->addTranslation($path . '/' . ACTIVE_LOCALE . '/LC_MESSAGES/messages.mo', ACTIVE_LOCALE);
+			if(!isset($locale) || !strlen($locale)) {
+				$locale = ACTIVE_LOCALE;
+			}
+			
+			if(!isset($key)) {
+				$key = $locale;
+			}
+			
+			if (file_exists($path . '/' . $locale . '/LC_MESSAGES/messages.mo')) {
+				$translate->addTranslation($path . '/' . $locale . '/LC_MESSAGES/messages.mo', $key);
 			}
 		}
 	}
@@ -267,6 +282,8 @@ class Package extends Object {
 		Loader::library('mail/importer');
 		Loader::model('job');
 		Loader::model('collection_types');
+		Loader::model('system/captcha/library');
+		Loader::model('system/antispam/library');
 		$items['attribute_categories'] = AttributeKeyCategory::getListByPackage($this);
 		$items['attribute_keys'] = AttributeKey::getListByPackage($this);
 		$items['attribute_sets'] = AttributeSet::getListByPackage($this);
@@ -279,6 +296,8 @@ class Package extends Object {
 		$items['task_permissions'] = $tp->populatePackagePermissions($this);
 		$items['single_pages'] = SinglePage::getListByPackage($this);
 		$items['attribute_types'] = AttributeType::getListByPackage($this);		
+		$items['captcha_libraries'] = SystemCaptchaLibrary::getListByPackage($this);		
+		$items['antispam_libraries'] = SystemAntispamLibrary::getListByPackage($this);		
 		$items['jobs'] = Job::getListByPackage($this);		
 		ksort($items);
 		return $items;
@@ -309,6 +328,8 @@ class Package extends Object {
 			return t(' %s (%s)', $txt->unhandle($item->getAttributeKeyHandle()), $txt->unhandle($akc->getAttributeKeyCategoryHandle()));
 		} else if ($item instanceof ConfigValue) {
 			return ucwords(strtolower($txt->unhandle($item->key)));
+		} else if ($item instanceof SystemAntispamLibrary) {
+			return $item->getSystemAntispamLibraryName();
 		} else if (is_a($item, 'TaskPermission')) {
 			return $item->getTaskPermissionName();			
 		} else if (is_a($item, 'Job')) {
@@ -340,6 +361,9 @@ class Package extends Object {
 							break;
 						case 'SinglePage':
 							@$item->delete(); // we suppress errors because sometimes the wrapper pages can delete first.
+							break;
+						case 'SystemAntispamLibrary':
+							$item->delete();
 							break;
 						case 'CollectionType':
 							$item->delete();
@@ -485,7 +509,8 @@ class Package extends Object {
 		$errorText[Package::E_PACKAGE_UNZIP] = t('An error occurred while trying to unzip the package.');
 		$errorText[Package::E_PACKAGE_INSTALL] = t('An error occurred while trying to install the package.');
 		$errorText[Package::E_PACKAGE_MIGRATE_BACKUP] = t('Unable to backup old package directory to %s', DIR_FILES_TRASH);
-
+		$errorText[Package::E_PACKAGE_INVALID_APP_VERSION] = t('This package isn\'t currently available for this version of concrete5. Please contact the maintainer of this package for assistance.');
+		
 		$testResultsText = array();
 		foreach($testResults as $result) {
 			if (is_array($result)) {

@@ -47,9 +47,9 @@ class UpgradeController extends Controller {
 			} else {
 				if ($this->post('do_upgrade')) {
 					$this->do_upgrade();
-				} elseif(version_compare($sav, '5.3.2', '<')) {
+				} elseif(version_compare($sav, '5.4.2.2', '<')) {
 					$this->set('hide_force',true);
-					$this->set('message',t('You must first upgrade your site to version 5.3.2'));
+					$this->set('message',t('You must first upgrade your site to version 5.4.2.2'));
 				} else {
 					// do the upgrade
 					$this->set_upgrades();
@@ -141,11 +141,15 @@ class UpgradeController extends Controller {
 			$ugvs[] = "version_550";
 		}
 
+		if (version_compare($sav, '5.5.1', '<')) { 
+			$ugvs[] = "version_551";
+		}
+
 		foreach($ugvs as $ugh) {
 			$this->upgrades[] = Loader::helper('concrete/upgrade/' . $ugh);
 		}
 	}
-	
+
 	public function refresh_schema() {
 		if ($this->upgrade_db) {
 			$installDirectory = DIR_BASE_CORE . '/config';
@@ -208,11 +212,11 @@ class UpgradeController extends Controller {
 			$upgrade = true;
 		} catch(Exception $e) {
 			$upgrade = false;
-			$message .= t('An Unexpected Error occurred while upgrading: %s', $e->getMessage());
+			$message .= '<div class="alert-message block-message error"><p>' . t('An Unexpected Error occurred while upgrading: %s', $e->getMessage()) . '</p></div>';
 		}
 		
 		if ($upgrade) {
-			$completeMessage .= t('Upgrade to <b>%s</b> complete!', APP_VERSION) . '<br/><br/>';
+			$completeMessage .= '<div class="alert-message block-message success"><p>' . t('Upgrade to <b>%s</b> complete!', APP_VERSION) . '</p></div>';
 			Config::save('SITE_APP_VERSION', APP_VERSION);
 		}
 		$this->set('completeMessage',$completeMessage);	

@@ -2,8 +2,14 @@
 <? $ih = Loader::helper('concrete/interface'); ?>
 <? if ($this->controller->getTask() == 'view_detail') { ?>
 
-	<? Loader::helper('concrete/dashboard')->enableDashboardBackNavigation('/dashboard/files/sets', t('File Sets'))?>
-	<?=Loader::helper('concrete/dashboard')->getDashboardPaneHeaderWrapper(t('File Set'))?>
+
+	<?=Loader::helper('concrete/dashboard')->getDashboardPaneHeaderWrapper(t('File Set'), false, 'span12 offset2', false)?>
+	<form method="post" id="file_sets_edit" action="<?=$this->url('/dashboard/files/sets', 'file_sets_edit')?>" onsubmit="return ccm_saveFileSetDisplayOrder()">
+		<?=$form->hidden('fsDisplayOrder', '')?>
+		<?=$validation_token->output('file_sets_edit');?>
+
+	<div class="ccm-pane-body">
+	
 	<div class="clearfix">
 	<ul class="tabs">
 		<li class="active"><a href="javascript:void(0)" onclick="$('.tabs').find('li.active').removeClass('active');$(this).parent().addClass('active');$('.ccm-tab').hide();$('#ccm-tab-details').show()" ><?=t('Details')?></a></li>
@@ -12,8 +18,6 @@
 	</div>
 
 	<div id="ccm-tab-details" class="ccm-tab">
-		<form method="post" id="file_sets_edit" action="<?=$this->url('/dashboard/files/sets', 'file_sets_edit')?>">
-			<?=$validation_token->output('file_sets_edit');?>
 
 		<?
 		$u=new User();
@@ -29,12 +33,10 @@
 		}
 		</script>
 
-		<? print $ih->button_js(t('Delete Set'), "deleteFileSet()", 'right','error');?>
-
 		<div class="clearfix">
 		<?=$form->label('file_set_name', t('Name'))?>
 		<div class="input">
-			<?=$form->text('file_set_name',$fs->fsName);?>	
+			<?=$form->text('file_set_name',$fs->fsName, array('class' => 'span5'));?>	
 		</div>
 		</div>
 
@@ -49,8 +51,9 @@
 		</div>
 
 		<div id="ccm-file-set-permissions-wrapper" <? if (!$fs->overrideGlobalPermissions()) { ?> style="display: none" <? } ?>>
-		<a href="<?=REL_DIR_FILES_TOOLS_REQUIRED?>/user_group_selector" id="ug-selector" dialog-width="90%" dialog-title="<?=t('Choose User/Group')?>"  dialog-height="70%" class="ccm-button-right dialog-launch btn"><?=t('Add Group or User')?></a>
-		<p><?=t('Add users or groups to determine access to the file manager. These permissions affect only this set.');?></p>
+
+		<a class="btn ccm-button-right dialog-launch ug-selector" href="<?=REL_DIR_FILES_TOOLS_REQUIRED?>/users/search_dialog?mode=choose_multiple" dialog-modal="false" dialog-width="90%" dialog-title="<?=t('Add User')?>"  dialog-height="70%"><?=t('Add User')?></a>
+		<a class="btn ccm-button-right dialog-launch ug-selector" style="margin-right: 5px" href="<?=REL_DIR_FILES_TOOLS_REQUIRED?>/select_group" dialog-modal="false" dialog-title="<?=t('Add Group')?>"><?=t('Add Group')?></a>
 
 		<div class="ccm-spacer">&nbsp;</div><br/>
 
@@ -98,12 +101,9 @@
 		<?php
 			echo $form->hidden('fsID',$fs->getFileSetID());
 		?>
-		<div class="actions">
-		<input type="submit" value="<?=t('Update Set')?>" class="btn primary" />
-		</div>
 		
-		</form>
-	</div>
+		</div>
+
 	<div style="display: none" class="ccm-tab" id="ccm-tab-files">
 		<?
 		Loader::model("file_list");
@@ -112,13 +112,6 @@
 		$fl->sortByFileSetDisplayOrder();
 		$files = $fl->get();
 		if (count($files) > 0) { ?>
-		
-		<form id="ccm-file-set-save-sort-order" method="post" action="<?=$this->url('/dashboard/files/sets', 'save_sort_order')?>">
-			<?=$form->hidden('fsDisplayOrder', '')?>
-			<?=$form->hidden('fsID', $fs->getFileSetID())?>
-		</form>
-		
-		<?=$ih->button_js(t('Save Display Order'), 'ccm_saveFileSetDisplayOrder()')?>
 		
 		
 		<p><?=t('Click and drag to reorder the files in this set. New files added to this set will automatically be appended to the end.')?></p>
@@ -145,17 +138,23 @@
 			<p><?=t('There are no files in this set.')?></p>
 		<? } ?>
 	</div>
-	
-	
-	<?=Loader::helper('concrete/dashboard')->getDashboardPaneFooterWrapper()?>
+	</div>
+	<div class="ccm-pane-footer">
+		<input type="submit" value="<?=t('Save')?>" class="btn primary ccm-button-v2-right" />
+		<? print $ih->button_js(t('Delete'), "deleteFileSet()", 'right','error');?>
+	</div>
+
+	<?=Loader::helper('concrete/dashboard')->getDashboardPaneFooterWrapper(false)?>
+
+	</form>
 	
 	
 	<script type="text/javascript">
 	
 	ccm_saveFileSetDisplayOrder = function() {
 		var fslist = $('.ccm-file-set-file-list').sortable('serialize');
-		$('form#ccm-file-set-save-sort-order input[name=fsDisplayOrder]').val(fslist);
-		$('form#ccm-file-set-save-sort-order').submit();
+		$('input[name=fsDisplayOrder]').val(fslist);
+		return true;
 	}
 	
 	$(function() {
@@ -183,7 +182,7 @@
 				ccm_alSelectPermissionsEntity('gID', gID, gName);
 			}
 
-			$("#ug-selector").dialog();	
+			$(".ug-selector").dialog();	
 			ccm_alActivateFilePermissionsSelector();	
 			
 			$("#fsOverrideGlobalPermissions").click(function() {
@@ -198,11 +197,19 @@
 <?php } else { ?>
 
 
-	<?=Loader::helper('concrete/dashboard')->getDashboardPaneHeaderWrapper(t('File Sets'), false, 'span16', false)?>
+	<?=Loader::helper('concrete/dashboard')->getDashboardPaneHeaderWrapper(t('File Sets'), false, 'span12 offset2', false)?>
 	<div class="ccm-pane-options">
 	<div class="ccm-pane-options-permanent-search">
 		
 		<form id="ccm-file-set-search" method="get" action="<?=$this->url('/dashboard/files/sets')?>">
+
+		<div class="span5">
+		<?=$form->label('fsKeywords', t('Keywords'))?>
+		<div class="input">
+		<input type="text" id="fsKeywords" name="fsKeywords" value="<?=Loader::helper('text')->entities($_REQUEST['fsKeywords'])?>" class="span3" />
+		</div>
+		</div>
+
 		<div class="span4">
 		<?=$form->label('fsType', t('Type'))?>
 		<div class="input">
@@ -210,13 +217,6 @@
 		<option value="<?=FileSet::TYPE_PUBLIC?>" <? if ($fsType != FileSet::TYPE_PRIVATE) { ?> selected <? } ?>><?=t('Public Sets')?></option>
 		<option value="<?=FileSet::TYPE_PRIVATE?>" <? if ($fsType == FileSet::TYPE_PRIVATE) { ?> selected <? } ?>><?=t('My Sets')?></option>
 		</select>
-		</div>
-		</div>
-
-		<div class="span5">
-		<?=$form->label('fsKeywords', t('Keywords'))?>
-		<div class="input">
-		<input type="text" id="fsKeywords" name="fsKeywords" value="<?=Loader::helper('text')->entities($_REQUEST['fsKeywords'])?>" class="span3" />
 		</div>
 		</div>
 				
@@ -227,10 +227,18 @@
 	</div>
 	</div>
 	<div class="ccm-pane-body <? if (!$fsl->requiresPaging()) { ?> ccm-pane-body-footer <? } ?> ">
+
+		<a href="<?=View::url('/dashboard/files/add_set')?>" style="float: right;z-index:999;position:relative;top:-5px" class="btn primary"><?=t("Add File Set")?></a>
+
+		<?=$fsl->displaySummary()?>
 	
-		<? if (count($fileSets) > 0) { 
+		<? if (count($fileSets) > 0) { ?>
 			
-		foreach ($fileSets as $fs) { ?>
+			<style type="text/css">
+				div.ccm-paging-top {padding-bottom:10px;}
+			</style>
+		
+		<? foreach ($fileSets as $fs) { ?>
 		
 			<div class="ccm-group">
 				<a class="ccm-group-inner" href="<?=$this->url('/dashboard/files/sets/', 'view_detail', $fs->getFileSetID())?>" style="background-image: url(<?=ASSETS_URL_IMAGES?>/icons/group.png)"><?=$fs->getFileSetName()?></a>

@@ -39,9 +39,17 @@ if ($cp->canAdminPage()) {
 			$("#" + ccm_activePropertiesTab + "-tab").show();
 			
 			if (ccm_activePropertiesTab == 'ccm-properties-custom') {
-				$('#ccm-dialog-content1').dialog('option','height','570');
+				<? if ($_REQUEST['approveImmediately']) { ?>
+					$('#ccm-dialog-content1').dialog('option','height','620');
+				<? } else { ?>
+					$('#ccm-dialog-content1').dialog('option','height','570');
+				<? } ?>
 			} else {
-				$('#ccm-dialog-content1').dialog('option','height','490');
+				<? if ($_REQUEST['approveImmediately']) { ?>
+					$('#ccm-dialog-content1').dialog('option','height','540');
+				<? } else { ?>
+					$('#ccm-dialog-content1').dialog('option','height','490');
+				<? } ?>
 			}
 			$('#ccm-dialog-content1').dialog('option','position','center');
 
@@ -74,18 +82,22 @@ if ($cp->canAdminPage()) {
 
 	<div id="ccm-required-meta">
 	
-		
+	
+	<? if (!$c->isMasterCollection()) { ?>
 	<ul class="tabs" id="ccm-properties-tabs">
-		<li <? if (!$c->isMasterCollection()) { ?>class="active"<? } else { ?>style="display: none"<? } ?>><a href="javascript:void(0)" id="ccm-properties-standard"><?=t('Standard Properties')?></a></li>
+		<li class="active"><a href="javascript:void(0)" id="ccm-properties-standard"><?=t('Standard Properties')?></a></li>
 		<li><a href="javascript:void(0)" id="ccm-properties-custom"><?=t('Custom Attributes')?></a></li>
 		<li <? if ($c->isMasterCollection()) { ?>style="display: none"<? } ?>><a href="javascript:void(0)" id="ccm-page-paths"><?=t('Page Paths and Location')?></a></li>
 	</ul>
+	<? } ?>
 
-	<div id="ccm-properties-standard-tab">
+	<div id="ccm-properties-standard-tab" <? if ($c->isMasterCollection()) { ?>style="display: none" <? } ?>>
 	
 	<div class="clearfix">
 		<label for="cName"><?=t('Name')?></label>
-		<div class="input"><input type="text" id="cName" name="cName" value="<?=htmlentities( $c->getCollectionName(), ENT_QUOTES, APP_CHARSET) ?>" /></div>
+		<div class="input"><input type="text" id="cName" name="cName" value="<?=htmlentities( $c->getCollectionName(), ENT_QUOTES, APP_CHARSET) ?>" />
+			<span class="help-inline"><?=t("Page ID: %s", $c->getCollectionID())?></span>
+		</div>
 	</div>
 
 	<div class="clearfix">
@@ -97,7 +109,6 @@ if ($cp->canAdminPage()) {
 	<div class="clearfix">
 	<label><?=t('Owner')?></label>
 	<div class="input">
-	
 		<? 
 		print $uh->selectUser('uID', $c->getCollectionUserID());
 		?>
@@ -120,7 +131,7 @@ if ($cp->canAdminPage()) {
 		<?php if (!$c->isGeneratedCollection()) { ?>
 			<?=BASE_URL . DIR_REL;?><? if (URL_REWRITING == false) { ?>/<?=DISPATCHER_FILENAME?><? } ?><?
 			$cPath = substr($c->getCollectionPath(), strrpos($c->getCollectionPath(), '/') + 1);
-			print substr($c->getCollectionPath(), 0, strrpos($c->getCollectionPath(), '/'))?>/<input type="text" name="cHandle" value="<?php echo $cPath?>" id="cHandle"><input type="hidden" name="oldCHandle" value="<?php echo $c->getCollectionHandle()?>"><br /><br />
+			print substr($c->getCollectionPath(), 0, strrpos($c->getCollectionPath(), '/'))?>/<input type="text" name="cHandle" value="<?php echo $cPath?>" id="cHandle"><input type="hidden" name="oldCHandle" id="oldCHandle" value="<?php echo $c->getCollectionHandle()?>"><br /><br />
 		<?php  } else { ?>
 			<?php echo $c->getCollectionHandle()?><br /><br />
 		<?php  } ?>
@@ -138,13 +149,13 @@ if ($cp->canAdminPage()) {
 					if (!$path['ppIsCanonical']) {
 						$ppID = $path['ppID'];
 						$cPath = $path['cPath'];
-						echo '<div class="input ccm-meta_path">' .
+						echo '<div class="input ccm-meta-path">' .
 			     			'<input type="text" name="ppURL-' . $ppID . '" class="ccm-input-text" value="' . $cPath . '" id="ppID-'. $ppID . '"> ' .
 			     			'<a href="javascript:void(0)" class="ccm-meta-path-del">' . t('Remove Path') . '</a></div>'."\n";
 					}
 				}
 			?>
-		    <div class="input">
+		    <div class="input ccm-meta-path">
 	     		<input type="text" name="ppURL-add-0" class="ccm-input-text" value="" id="ppID-add-0">
 		 		<a href="javascript:void(0)" class="ccm-meta-path-add"><?=t('Add Path')?></a>
 			</div>
@@ -157,7 +168,7 @@ if ($cp->canAdminPage()) {
 	#ccm-more-page-paths div.input {margin-bottom: 10px;}
 	</style>
 	
-	<div id="ccm-properties-custom-tab" style="display: none">
+	<div id="ccm-properties-custom-tab" <? if (!$c->isMasterCollection()) { ?>style="display: none" <? } ?>>
 		<? Loader::element('collection_metadata_fields', array('c'=>$c ) ); ?>
 	</div>
 
@@ -168,5 +179,6 @@ if ($cp->canAdminPage()) {
 </form>
 </div>
 	<div class="dialog-buttons">
-	<a href="javascript:void(0)" class="btn primary" onclick="$('#ccmMetadataForm').submit()"><?=t('Save')?></a>
+	<a href="javascript:void(0)" onclick="jQuery.fn.dialog.closeTop();" class="ccm-button-left btn"><?=t('Cancel')?></a>
+	<a href="javascript:void(0)" class="btn primary ccm-button-right" onclick="$('#ccmMetadataForm').submit()"><?=t('Save')?></a>
 	</div>

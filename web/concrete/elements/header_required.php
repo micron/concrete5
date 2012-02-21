@@ -68,12 +68,18 @@ $this->addHeaderItem($html->javascript('jquery.js'), 'CORE');
 $this->addHeaderItem($html->javascript('ccm.base.js', false, true), 'CORE');
 
 $favIconFID=intval(Config::get('FAVICON_FID'));
+$appleIconFID =intval(Config::get('IPHONE_HOME_SCREEN_THUMBNAIL_FID'));
 
 
 if($favIconFID) {
 	$f = File::getByID($favIconFID); ?>
 	<link rel="shortcut icon" href="<?php echo $f->getRelativePath()?>" type="image/x-icon" />
 	<link rel="icon" href="<?php echo $f->getRelativePath()?>" type="image/x-icon" />
+<?php } 
+
+if($appleIconFID) {
+	$f = File::getByID($appleIconFID); ?>
+	<link rel="apple-touch-icon" href="<?php echo $f->getRelativePath()?>"  />
 <?php } ?>
 
 <?php 
@@ -88,7 +94,7 @@ if (is_object($cp)) {
 	}
 	$cih = Loader::helper('concrete/interface');
 	if ($cih->showNewsflowOverlay()) {
-		$this->addFooterItem('<script type="text/javascript">$(function() { ccm_showNewsflow(); });</script>');
+		$this->addFooterItem('<script type="text/javascript">$(function() { ccm_showDashboardNewsflowWelcome(); });</script>');
 	}	
 
 }

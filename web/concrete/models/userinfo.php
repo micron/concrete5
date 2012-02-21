@@ -222,6 +222,7 @@ defined('C5_EXECUTE') or die("Access Denied.");
 			}
 
 			$r = $db->query("DELETE FROM UsersFriends WHERE friendUID = ?",array(intval($this->uID)) );
+			$r = $db->query("DELETE FROM UserSearchIndexAttributes WHERE uID = ?",array(intval($this->uID)) );
 			
 			$r = $db->query("DELETE FROM UserGroups WHERE uID = ?",array(intval($this->uID)) );
 			$r = $db->query("DELETE FROM UserOpenIDs WHERE uID = ?",array(intval($this->uID)));
@@ -260,7 +261,17 @@ defined('C5_EXECUTE') or die("Access Denied.");
 			Loader::model('user_private_message');
 			if(UserPrivateMessageLimit::isOverLimit($this->getUserID())) {
 				return UserPrivateMessageLimit::getErrorObject();
-			}		
+			}
+			$antispam = Loader::helper('validation/antispam');
+			$messageText = t('Subject: %s', $subject);
+			$messageText .= "\n";
+			$messageText .= t('Message: %s', $text);
+			
+			$additionalArgs = array('user' => $this);
+			if (!$antispam->check($messageText, 'private_message', $additionalArgs)) {
+				return false;
+			}
+			
 			$subject = ($subject == '') ? t('(No Subject)') : $subject;
 			$db = Loader::db();
 			$dt = Loader::helper('date');
@@ -562,12 +573,14 @@ defined('C5_EXECUTE') or die("Access Denied.");
 			$db = Loader::db();
 			$q = "update Users set uIsActive = 1 where uID = '{$this->uID}'";
 			$r = $db->query($q);
+			Events::fire('on_user_activate', $this);
 		}
 
 		function deactivate() {
 			$db = Loader::db();
 			$q = "update Users set uIsActive = 0 where uID = '{$this->uID}'";
 			$r = $db->query($q);
+			Events::fire('on_user_deactivate', $this);
 		}
 		
 		function notifyUser(){

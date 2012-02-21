@@ -21,6 +21,11 @@
 	
 	<input type="submit" name="ccm-add-block-submit" value="submit" style="display: none" id="ccm-form-submit-button" />
 
-	<div class="ccm-spacer">&nbsp;</div>
 	<input type="hidden" name="processBlock" value="1">
 </form>
+
+<? 
+$cont = $bt->getController();
+if ($cont->getBlockTypeWrapperClass() != '') { ?>
+</div>
+<? } ?>

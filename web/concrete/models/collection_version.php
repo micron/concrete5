@@ -61,11 +61,22 @@
 		public function refreshCache() {
 			$db = Loader::db();
 			$cID = $this->cID;
+			$cvID = $this->cvID;
+			/*
 			$cvIDs = $db->GetCol("select cvID from CollectionVersions where cID = ?", $this->cID);
 			foreach($cvIDs as $cvID) {
 				Cache::delete('page', $cID . ':' . $cvID);
 				Cache::delete('collection_blocks', $cID . ':' . $cvID);
-			}
+			}*/
+			
+			Cache::delete('page', $cID . ':' . $cvID);
+			// I know this is very unnecessary because most pages aren't stacks, but this is the cleanest way to make this happen
+			// We will redo this so that you don't even need to cache data about pages that aren't the most recent or the active page, because how much data do you really need besides that?
+			Cache::delete('stack', $cID . ':' . $cvID); 			
+			Cache::delete('composerpage', $cID . ':' . $cvID); 			
+			Cache::delete('collection_blocks', $cID . ':' . $cvID);
+			Events::fire('on_page_version_refresh_cache', $this);
+			
 		}
 		
 		public function get(&$c, $cvID) {
@@ -112,6 +123,7 @@
 		function isMostRecent() {return $this->cvIsMostRecent;}
 		function isNew() {return $this->cvIsNew;}
 		function getVersionID() {return $this->cvID;}
+		function getCollectionID() {return $this->cID;}
 		function getVersionName() {return $this->cvName;}	
 		function getVersionComments() {return $this->cvComments;}
 		function getVersionAuthorUserID() {return $this->cvAuthorUID;}
@@ -201,7 +213,7 @@
 			return ($cvID == $this->cvID);
 		}
 		
-		function approve() {
+		function approve($doReindexImmediately = true) {
 			$db = Loader::db();
 			$u = new User();
 			$uID = $u->getUserID();
@@ -230,9 +242,14 @@
 			$r = $db->query($q2, $v2);
 			
 			// next, we rescan our collection paths for the particular collection, but only if this isn't a generated collection
+			// I don't know why but this just isn't reliable. It might be a race condition with the cached page objects?
+			/*
 			if ((($oldHandle != $newHandle) || $oldHandle == '') && (!$c->isGeneratedCollection())) {
-				$c->rescanCollectionPath();
-			}
+			*/
+			
+			$c->rescanCollectionPath();
+			
+			//}
 
 			// check for related version edits. This only gets applied when we edit global areas.
 			if ($this->isNew()) {
@@ -250,9 +267,8 @@
 			}
 
 			Events::fire('on_page_version_approve', $c);
-			$c->reindex();
+			$c->reindex(false, $doReindexImmediately);
 			$this->refreshCache();
-
 		}
 		
 		public function discard() {
@@ -262,7 +278,12 @@
 				$this->delete();
 			}
 			$this->refreshCache();
-
+		}
+		
+		public function canDiscard() {
+			$db = Loader::db();
+			$total = $db->GetOne('select count(cvID) from CollectionVersions where cID = ?', array($this->cID));
+			return $this->isNew() && $total > 1;
 		}
 		
 		public function removeNewStatus() {

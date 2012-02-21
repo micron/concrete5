@@ -39,6 +39,8 @@ class MarketplaceRemoteItem extends Object {
 			return array();
 		}
 	}
+	public function getMarketplaceItemVersionForThisSite() {return $this->siteLatestAvailableVersion;}
+	
 	public function getAverageRating() {return $this->rating;}
 	public function getVersionHistory() {return $this->versionHistory;}
 	public function getTotalRatings() {
@@ -52,6 +54,14 @@ class MarketplaceRemoteItem extends Object {
 	public function getRemoteCollectionID(){ return $this->cID; }
 	public function getReviewBody() {
 		return $this->reviewBody;
+	}
+	public function getLargeThumbnail() {
+		if ($this->largethumbnail) {
+			return $this->largethumbnail;
+		} else {
+			$screenshots = $this->getScreenshots();
+			return $screenshots[0];
+		}
 	}
 	public function getRemoteURL(){ return $this->url; }
 	public function getProductBlockID() {return $this->productBlockID;}
@@ -107,6 +117,8 @@ class MarketplaceRemoteItem extends Object {
 		if (empty($file) || $file == Package::E_PACKAGE_DOWNLOAD) {
 			return array(Package::E_PACKAGE_DOWNLOAD);
 		} else if ($file == Package::E_PACKAGE_SAVE) {
+			return array($file);
+		} else if ($file == Package::E_PACKAGE_INVALID_APP_VERSION) {
 			return array($file);
 		}
 	
@@ -211,6 +223,10 @@ class MarketplaceRemoteItemList extends ItemList {
 	public function filterByKeywords($keywords) {
 		$this->params['keywords'] = $keywords;
 	}
+
+	public function filterByMarketplaceItemID($mpID) {
+		$this->params['mpID'] = $mpID;
+	}
 	
 	public function sortBy($sortBy) {
 		$this->params['sort'] = $sortBy;
@@ -222,6 +238,10 @@ class MarketplaceRemoteItemList extends ItemList {
 
 	public function filterByIsFeaturedRemotely($r) {
 		$this->params['is_featured_remotely'] = $r;
+	}
+	
+	public function filterByCompatibility($r) {
+		$this->params['is_compatible'] = $r;
 	}
 	
 	public function execute() {
@@ -249,7 +269,6 @@ class MarketplaceRemoteItemList extends ItemList {
 		$uh = Loader::helper('url');
 		
 		$url = $uh->buildQuery(MARKETPLACE_REMOTE_ITEM_LIST_WS . $this->type . '/-/get_remote_list', $params);
-
 		$r = Loader::helper('file')->getContents($url);
 		$r2 = @Loader::helper('json')->decode($r);
 				

@@ -78,7 +78,7 @@ if ($showTable) { ?>
 			<td><?=$text->entities($survey['surveyName'])?></td>
 			<td><?=$text->entities($survey['answerSetCount'])?></td>
 			<td>
-				<?=$ih->button(t('View Responses'), DIR_REL . '/index.php?cID=' . $c->getCollectionID().'&qsid='.$qsid, 'left', 'primary small')?>
+				<?=$ih->button(t('View Responses'), DIR_REL . '/index.php?cID=' . $c->getCollectionID().'&qsid='.$qsid, 'left', 'small')?>
 				<?=$ih->button(t('Open Page'), $url, 'left', 'small')?>
 				<?if(!$in_use):?>
 				<?=$ih->button(t('Delete'), $this->action('').'?bID='.$survey['bID'].'&qsID='.$qsid.'&action=deleteForm', 'left', 'small error delete-form')?>
@@ -95,9 +95,6 @@ if ($showTable) { ?>
 <?else:?>
 <?=$h->getDashboardPaneHeaderWrapper(t('Responses to %s', $surveys[$questionSet]['surveyName']), false, false, false);?>
 <div class="ccm-pane-body <? if(!$paginator || !strlen($paginator->getPages())>0){ ?> ccm-pane-body-footer <? } ?>">
-<ul class="breadcrumb">
-	<li><a href="<?=$this->action('')?>">&lt; <?=t('Return to Form List')?></a></li>
-</ul>
 <?if(count($answerSets) == 0):?>
 <div><?=t('No one has yet submitted this form.')?></div>
 <?else:?>
@@ -152,9 +149,7 @@ if ($showTable) { ?>
 					echo '<td>'.t('File not found').'</td>';
 				}
 			} else if($question['inputType'] == 'text') {
-				echo '<td title="'.$text->entities($answerSet['answers'][$questionId]['answerLong']).'">';
-				echo $text->entities($text->shortenTextWord($answerSet['answers'][$questionId]['answerLong']));
-				echo '</td>';
+				echo '<td>'.$text->entities($answerSet['answers'][$questionId]['answerLong']).'</td>';
 			} else {
 				echo '<td>'.$text->entities($answerSet['answers'][$questionId]['answer']).'</td>';
 			}

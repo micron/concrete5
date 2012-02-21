@@ -71,6 +71,7 @@ ccm_activateSearchResults = function(searchType) {
 			$(this).get(0).scrollTop = 0;
 		});
 	}
+	$('.dialog-launch').dialog();
 	var obj = $("#ccm-" + searchType + "-search-loading");
 	if (obj.length == 0 || searchType == null) {
 		obj = $("#ccm-search-loading");
@@ -113,9 +114,9 @@ ccm_setupInPagePaginationAndSorting = function(searchType) {
 		return false;
 	});
 	$(".ccm-pane-dialog-pagination").each(function() {
-		$(this).closest('.ui-dialog').find('.ui-dialog-buttonpane').html('');
-		$(this).closest('.ui-dialog').find('.ui-dialog-buttonpane').addClass("ccm-ui");
-		$(this).appendTo($(this).closest('.ui-dialog').find('.ui-dialog-buttonpane'));
+		$(this).closest('.ui-dialog-content').dialog('option', 'buttons', [{}]);
+		$(this).closest('.ui-dialog').find('.ui-dialog-buttonpane .ccm-pane-dialog-pagination').remove();
+		$(this).appendTo($(this).closest('.ui-dialog').find('.ui-dialog-buttonpane').addClass('ccm-ui'));
 	});
 	
 }

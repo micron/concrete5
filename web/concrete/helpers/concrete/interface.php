@@ -151,7 +151,7 @@ class ConcreteInterfaceHelper {
 	public function showNewsflowOverlay() {
 		$tp = new TaskPermission();
 		$c = Page::getCurrentPage();
-		if ($tp->canViewNewsflow() && $c->getCollectionPath() != '/dashboard') {
+		if (ENABLE_NEWSFLOW_OVERLAY == true && $tp->canViewNewsflow() && $c->getCollectionPath() != '/dashboard/news') {
 			$u = new User();
 			$nf = $u->config('NEWSFLOW_LAST_VIEWED');
 			if ($nf == 'FIRSTRUN') {
@@ -170,22 +170,30 @@ class ConcreteInterfaceHelper {
 	
 	public function getQuickNavigationBar() {
 		$c = Page::getCurrentPage();
-		if (!is_object($c)) {
+		if (!is_object($c) || Config::get('TOOLBAR_QUICK_NAV_BEHAVIOR') == 'disabled') {
 			return;
 		}
 		
 		if (!is_array($_SESSION['ccmQuickNavRecentPages'])) {
 			$_SESSION['ccmQuickNavRecentPages'] = array();
 		}
-		if (!in_array($c->getCollectionID(), $_SESSION['ccmQuickNavRecentPages'])) {
-			$_SESSION['ccmQuickNavRecentPages'][] = $c->getCollectionID();
+		if (in_array($c->getCollectionID(), $_SESSION['ccmQuickNavRecentPages'])) {
+			unset($_SESSION['ccmQuickNavRecentPages'][array_search($c->getCollectionID(), $_SESSION['ccmQuickNavRecentPages'])]);
+			$_SESSION['ccmQuickNavRecentPages'] = array_values($_SESSION['ccmQuickNavRecentPages']);
 		}
+		
+		$_SESSION['ccmQuickNavRecentPages'][] = $c->getCollectionID();
+
 		if (count($_SESSION['ccmQuickNavRecentPages']) > 5) {
 			array_shift($_SESSION['ccmQuickNavRecentPages']);
 		}
 		
 		$html = '';
-		$html .= '<div id="ccm-quick-nav">';
+		$class = '';
+		if (Config::get('TOOLBAR_QUICK_NAV_BEHAVIOR') == 'always') { 
+			$class = 'ccm-quick-nav-always';
+		}
+		$html .= '<div id="ccm-quick-nav" class="' . $class . '">';
 		$html .= '<ul id="ccm-quick-nav-favorites" class="pills">';
 		$u = new User();
 		$quicknav = unserialize($u->config('QUICK_NAV_BOOKMARKS'));
@@ -212,7 +220,7 @@ class ConcreteInterfaceHelper {
 				if ($_c->getCollectionName()) {
 					$name = $_c->getCollectionName();
 				}
-				$html .= '<li><a href="' . Loader::helper('navigation')->getLinkToCollection($_c) . '">' . t($name) . '</a>' . $divider . '</li>';
+				$html .= '<li><a id="ccm-recent-page-' . $_c->getCollectionID() . '" href="' . Loader::helper('navigation')->getLinkToCollection($_c) . '">' . t($name) . '</a>' . $divider . '</li>';
 				$i++;
 			}
 			$html .= '</ul>';

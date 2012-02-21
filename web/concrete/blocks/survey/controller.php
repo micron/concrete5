@@ -44,7 +44,7 @@ class SurveyBlockController extends BlockController {
 	
 	function __construct($obj = NULL) {
 		parent::__construct($obj);
-		$c = $this->getCollectionObject();
+		$c = Page::getCurrentPage();
 		
 		if (is_object($c)) {
 			$this->cID = $c->getCollectionID();
@@ -105,26 +105,36 @@ class SurveyBlockController extends BlockController {
 		$u = new User();
 		$db = Loader::db();
 		$bo = $this->getBlockObject();
-		$c = $this->getCollectionObject();
+		if ($this->post('rcID')) { 
+			// we pass the rcID through the form so we can deal with stacks
+			$c = Page::getByID($this->post('rcID'));
+		} else { 
+			$c = $this->getCollectionObject();
+		}
+		
 		if ($this->requiresRegistration()) {
 			if (!$u->isRegistered()) {
 				$this->redirect('/login');
 			}			
 		}
-		
+
 		if (!$this->hasVoted()) {
-			$duID = 0;
-			if($u->getUserID()>0) {
-				$duID = $u->getUserID();
+
+			$antispam = Loader::helper('validation/antispam');
+			if ($antispam->check('', 'survey_block')) { // we do a blank check which will still check IP and UserAgent's
+				$duID = 0;
+				if($u->getUserID()>0) {
+					$duID = $u->getUserID();
+				}
+				
+				$v = array($_REQUEST['optionID'], $this->bID, $duID, $_SERVER['REMOTE_ADDR'], $this->cID);
+				$q = "insert into btSurveyResults (optionID, bID, uID, ipAddress, cID) values (?, ?, ?, ?, ?)";
+				$db->query($q, $v);
+				setcookie("ccmPoll" . $this->bID.'-'.$this->cID, "voted", time() + 1296000, DIR_REL . '/');
+				$this->redirect($c->getCollectionPath() . '?survey_voted=1');
 			}
-			
-			$v = array($_REQUEST['optionID'], $this->bID, $duID, $_SERVER['REMOTE_ADDR'], $this->cID);
-			$q = "insert into btSurveyResults (optionID, bID, uID, ipAddress, cID) values (?, ?, ?, ?, ?)";
-			$db->query($q, $v);
-			setcookie("ccmPoll" . $this->bID.'-'.$this->cID, "voted", time() + 1296000, DIR_REL . '/');
-			$this->redirect($c->getCollectionPath() . '?survey_voted=1');
 		}
-	}		
+	}
 
 	function duplicate($newBID) {
 		

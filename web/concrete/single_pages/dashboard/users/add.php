@@ -15,7 +15,7 @@ $languages = Localization::getAvailableInterfaceLanguages();
 
 ?>
 
-<?=Loader::helper('concrete/dashboard')->getDashboardPaneHeaderWrapper(t('Add User').'<span class="label" style="position:relative;top:-3px;left:12px;">'.t('* required field').'</span>', false, false, false);?>
+<?=Loader::helper('concrete/dashboard')->getDashboardPaneHeaderWrapper(t('Add User'), false, false, false);?>
 
 <form method="post" enctype="multipart/form-data" id="ccm-user-form" action="<?=$this->url('/dashboard/users/add')?>">
 	<?=$valt->output('create_account')?>
@@ -90,12 +90,8 @@ $languages = Localization::getAvailableInterfaceLanguages();
 			<? foreach($attribs as $ak) { ?>
                 <tr>
                     <td class="clearfix">
-                    	<label>
-                            <p>
-                                <?=$ak->getAttributeKeyName()?> <? if ($ak->isAttributeKeyRequiredOnRegister()) { ?><span class="required">*</span><? } ?>
-                            </p>
-                            <? $ak->render('form', $caValue, false)?>
-                        </label>
+                    	<label><?=$ak->getAttributeKeyName()?> <? if ($ak->isAttributeKeyRequiredOnRegister()) { ?><span class="required">*</span><? } ?></label>
+                        <? $ak->render('form', $caValue, false)?>
                     </td>
                 </tr>
             <? } // END Foreach ?>
@@ -140,7 +136,7 @@ $languages = Localization::getAvailableInterfaceLanguages();
     <div class="ccm-pane-footer">
         <div class="ccm-buttons">
             <input type="hidden" name="create" value="1" />
-            <? print $ih->submit(t('Create User'), 'ccm-user-form', 'right', 'primary'); ?>
+            <? print $ih->submit(t('Add'), 'ccm-user-form', 'right', 'primary'); ?>
         </div>	
     </div>
 

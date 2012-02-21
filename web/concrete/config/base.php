@@ -22,7 +22,7 @@ if (!defined('BASE_URL')) {
 }
 
 if (!defined('DIR_REL')) {
-	$uri = substr($_SERVER['SCRIPT_NAME'], 0, strpos($_SERVER['SCRIPT_NAME'], DISPATCHER_FILENAME) - 1);
+	$uri = substr($_SERVER['SCRIPT_NAME'], 0, stripos($_SERVER['SCRIPT_NAME'], DISPATCHER_FILENAME) - 1);
 	define('DIR_REL', $uri);
 }
 
@@ -107,6 +107,10 @@ if (!defined("DB_COLLATE")) {
 
 define("LANGUAGE_DOMAIN_CORE", "messages");
 
+if (!defined('FILE_PERMISSIONS_MODE')) {
+	define('FILE_PERMISSIONS_MODE', 0775);
+}
+
 # Path to the core files shared between all concrete 5 installations
 if (!defined('DIR_BASE_CORE')) {
 	define('DIR_BASE_CORE', dirname(__FILE__) . '/..');
@@ -180,6 +184,11 @@ define('DIRNAME_JAVASCRIPT', 'js');
 define('DIRNAME_IMAGES', 'images');
 define('DIRNAME_HELPERS', 'helpers');
 
+define('DIRNAME_SYSTEM_TYPES', 'types');
+define('DIRNAME_SYSTEM_CAPTCHA', 'captcha');
+define('DIRNAME_SYSTEM_ANTISPAM', 'antispam');
+define('DIRNAME_SYSTEM', 'system');
+
 # Blocks
 define('DIR_FILES_BLOCK_TYPES', DIR_BASE . '/blocks');
 define('DIR_FILES_BLOCK_TYPES_CORE', DIR_BASE_CORE . '/blocks');
@@ -192,6 +201,7 @@ define('FILENAME_BLOCK_ICON', 'icon.png');
 define('FILENAME_BLOCK_CONTROLLER', 'controller.php');
 define('FILENAME_BLOCK_DB', 'db.xml');
 define('BLOCK_HANDLE_SCRAPBOOK_PROXY', 'core_scrapbook_display');
+define('FILENAME_FORM', 'form.php');
 
 # Stacks
 define('STACKS_PAGE_PATH', '/!stacks');
@@ -266,6 +276,7 @@ define('FILENAME_ATTRIBUTE_DB', 'db.xml');
 define('DIR_FILES_ELEMENTS', DIR_BASE . '/elements');
 define('DIR_FILES_ELEMENTS_CORE', DIR_BASE_CORE . '/elements');
 define('FILENAME_MENU_ITEM_CONTROLLER', 'controller.php');
+define('FILENAME_CONTROLLER', 'controller.php');
 
 # Jobs
 if (!defined('DIR_FILES_JOBS')) {
@@ -479,14 +490,14 @@ define('APP_VERSION_LATEST_DOWNLOAD', 'http://www.concrete5.org/download/');
 
 //Main Concrete Site - For Marketplace, Knowledge Base, etc.
 if (!defined('CONCRETE5_ORG_URL')) {
-	define('CONCRETE5_ORG_URL', 'http://betatime.concrete5.org');
+	define('CONCRETE5_ORG_URL', 'http://www.concrete5.org');
 }
-if (!defined('NEWSFLOW_URL')) {
-	define('NEWSFLOW_URL', 'http://newsflow.concrete5.org');
+if (!defined('CONCRETE5_ORG_URL_SECURE')) {
+	define('CONCRETE5_ORG_URL_SECURE', 'https://www.concrete5.org');
 }
 
-if (!defined('ENABLE_APP_NEWS')) {
-	define('ENABLE_APP_NEWS', true);
+if (!defined('NEWSFLOW_URL')) {
+	define('NEWSFLOW_URL', 'http://newsflow.concrete5.org');
 }
 
 if (!defined('ENABLE_TRASH_CAN')) { 
@@ -494,10 +505,11 @@ if (!defined('ENABLE_TRASH_CAN')) {
 }
 
 define('MARKETPLACE_BASE_URL_SITE_PAGE', CONCRETE5_ORG_URL.'/private/sites');
+define('NEWSFLOW_SLOT_CONTENT_URL', NEWSFLOW_URL . '/tools/slot_content/');
 
 define('MARKETPLACE_URL_CONNECT', CONCRETE5_ORG_URL.'/marketplace/connect');
 define('MARKETPLACE_URL_CONNECT_SUCCESS', CONCRETE5_ORG_URL.'/marketplace/connect/-/connected');
-define('MARKETPLACE_URL_CHECKOUT', CONCRETE5_ORG_URL.'/cart/-/add/');
+define('MARKETPLACE_URL_CHECKOUT', CONCRETE5_ORG_URL_SECURE.'/cart/-/add/');
 define('MARKETPLACE_URL_CONNECT_VALIDATE', CONCRETE5_ORG_URL.'/marketplace/connect/-/validate');
 define('MARKETPLACE_PURCHASES_LIST_WS', CONCRETE5_ORG_URL . '/marketplace/connect/-/get_available_licenses');
 define('MARKETPLACE_ITEM_INFORMATION_WS', CONCRETE5_ORG_URL . '/marketplace/connect/-/get_item_information');
@@ -506,7 +518,9 @@ define('MARKETPLACE_URL_CONNECT_TOKEN_NEW', CONCRETE5_ORG_URL.'/marketplace/conn
 define('MARKETPLACE_REMOTE_ITEM_LIST_WS', CONCRETE5_ORG_URL.'/marketplace/');
 
 define('DASHBOARD_BACKGROUND_FEED', 'http://backgroundimages.concrete5.org/wallpaper');
-define('DASHBOARD_BACKGROUND_INFO', 'http://backgroundimages.concrete5.org/get_image_data.php');
+if (!defined('DASHBOARD_BACKGROUND_INFO')) { 
+	define('DASHBOARD_BACKGROUND_INFO', 'http://backgroundimages.concrete5.org/get_image_data.php');
+}
 
 if (!defined("MENU_HELP_URL")) {
 	define('MENU_HELP_URL', CONCRETE5_ORG_URL . '/tools/help_overlay/');

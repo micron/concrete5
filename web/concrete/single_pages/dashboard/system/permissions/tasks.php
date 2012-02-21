@@ -1,10 +1,10 @@
 <? defined('C5_EXECUTE') or die("Access Denied."); ?>
 
 <? $h = Loader::helper('concrete/dashboard'); ?>
-<?=$h->getDashboardPaneHeaderWrapper(t('Site Permissions'), false, false, false);?>
 <?
 $tp1 = TaskPermission::getByHandle('access_task_permissions');
 if ($tp1->can()) { 
+	print $h->getDashboardPaneHeaderWrapper(t('Site Permissions'), false, false, false);
 	$ih = Loader::helper('concrete/interface');
 	$tps = array(
 		TaskPermission::getByHandle('access_task_permissions'),
@@ -26,7 +26,7 @@ if ($tp1->can()) {
 	
 		<form method="post" id="ccm-task-permissions" action="<?=$this->url('/dashboard/system/permissions/tasks', 'save_task_permissions')?>">
 		<?=$this->controller->token->output('update_permissions');?>
-		<? print Loader::helper('concrete/dashboard/task_permissions')->getForm($tpl, t('Set permissions for common concrete5 tasks.')); ?>
+		<? print Loader::helper('concrete/dashboard/task_permissions')->getForm($tpl, t('Set administrative access details.')); ?>
 		<div class="ccm-pane-footer">
 			<? print $ih->submit(t('Save'), 'ccm-task-permissions', 'right', 'primary'); ?>
 		</div>

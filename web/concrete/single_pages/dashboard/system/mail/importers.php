@@ -1,4 +1,3 @@
-
 <? $ih = Loader::helper('concrete/interface'); ?>
 <?
 $enabledVals = array('0' => t('No'), '1' => t('Yes'));
@@ -14,18 +13,18 @@ $form = Loader::helper('form');
 
 	<form method="post" id="mail-importer-form" action="<?=$this->url('/dashboard/system/mail/importers', 'save_importer')?>">
 		<fieldset>
-			<legend><?=$mi->getMailImporterName()?> <?=t('Settings');?></legend>
+			<legend><?=t($mi->getMailImporterName())?> <?=t('Settings');?></legend>
 			<?=$form->hidden('miID', $mi->getMailImporterID())?>
 		
 			<div class="clearfix">
-				<?=$form->label('miEmail','Email Address to Route Emails To');?>
+				<?=$form->label('miEmail',t('Email Address to Route Emails To'));?>
 				<div class="input">
 					<?=$form->text('miEmail', $mi->getMailImporterEmail())?>
 				</div>
 			</div>
 			
 			<div class="clearfix">
-				<?=$form->label('miIsEnabled','Enabled');?>
+				<?=$form->label('miIsEnabled',t('Enabled'));?>
 				<div class="input">
 					<?=$form->select('miIsEnabled', $enabledVals, $mi->isMailImporterEnabled())?>
 				</div>
@@ -34,26 +33,26 @@ $form = Loader::helper('form');
 		<fieldset>
 			<legend><?=t('POP Mail Server Authentication Settings')?></legend>
 			<div class="clearfix">
-				<?=$form->label('miServer','Mail Server');?>
+				<?=$form->label('miServer',t('Mail Server'));?>
 				<div class="input">
 					<?=$form->text('miServer', $mi->getMailImporterServer())?>
 				</div>
 			</div>
 			<div class="clearfix">
-				<?=$form->label('miUsername','Username');?>
+				<?=$form->label('miUsername',t('Username'));?>
 				<div class="input">
 					<?=$form->text('miUsername', $mi->getMailImporterUsername())?>
 				</div>
 			</div>
 			<div class="clearfix">
-				<?=$form->label('miPassword','Password');?>
+				<?=$form->label('miPassword',t('Password'));?>
 				<div class="input">
 					<?=$form->text('miPassword', $mi->getMailImporterPassword())?>
 				</div>
 			</div>
 			
 			<div class="clearfix">
-				<?=$form->label('miEncryption','Encryption');?>
+				<?=$form->label('miEncryption',t('Encryption'));?>
 				<div class="input">
 					<?=$form->select('miEncryption', $secureVals, $mi->getMailImporterEncryption())?>
 				</div>
@@ -61,9 +60,16 @@ $form = Loader::helper('form');
 			<? $port = $mi->getMailImporterPort() == 0 ? '' : $mi->getMailImporterPort(); ?>
 		
 			<div class="clearfix">
-				<?=$form->label('miPort','Port (Leave blank for default)');?>
+				<?=$form->label('miPort',t('Port (Leave blank for default)'));?>
 				<div class="input">
 					<?=$form->text('miPort', $port)?>
+				</div>
+			</div>
+
+			<div class="clearfix">
+				<?=$form->label('miConnectionMethod', t('Connection Method'));?>
+				<div class="input">
+					<?=$form->select('miConnectionMethod', array('POP' => 'POP', 'IMAP' => 'IMAP'), $mi->getMailImporterConnectionMethod())?>
 				</div>
 			</div>
 

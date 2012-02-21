@@ -39,9 +39,7 @@ function printAttributeRow($ak, $uo) {
 		<input type="hidden" name="uID" value="' . $uo->getUserID() . '" />
 		<input type="hidden" name="task" value="update_extended_attribute" />
 		<div class="ccm-attribute-editable-field-form ccm-attribute-editable-field-type-' . strtolower($type->getAttributeTypeHandle()) . '">
-		<label>
 		' . $ak->render('form', $vo, true) . '
-		</label>
 		</div>
 		</form>
 		</td>
@@ -141,13 +139,13 @@ if (is_object($uo)) {
 	</script>
 		
 		
-	<?=Loader::helper('concrete/dashboard')->getDashboardPaneHeaderWrapper(t('Edit User').'<span class="label" style="position:relative;top:-3px;left:12px;">'.t('* required field').'</span>', t('Edit User account.'), false, false);?>
+	<?=Loader::helper('concrete/dashboard')->getDashboardPaneHeaderWrapper(t('Edit User'), t('Edit User account.'), false, false);?>
 	
+    
+	<div class="ccm-pane-body">
     <form method="post" enctype="multipart/form-data" id="ccm-user-form" action="<?=$this->url('/dashboard/users/search?uID=' . intval($_GET['uID']) )?>">
 	<?=$valt->output('update_account_' . intval($_GET['uID']) )?>
 	<input type="hidden" name="_disableLogin" value="1">
-    
-	<div class="ccm-pane-body">
 
 		<table border="0" cellspacing="0" cellpadding="0" width="100%">
             <thead>
@@ -212,7 +210,7 @@ if (is_object($uo)) {
                         Zend_Locale_Data::setCache(Cache::getLibrary());
                         foreach($languages as $lang) {
                             $loc = new Zend_Locale($lang);
-                            $locales[$lang] = Zend_Locale::getTranslation($loc->getLanguage(), 'language', ACTIVE_LOCALE);
+                            $locales[$lang] = Zend_Locale::getTranslation($loc->getLanguage(), 'language', $lang);
                         }
                         $ux = $uo->getUserObject();
                         print $form->select('uDefaultLanguage', $locales, $ux->getUserDefaultLanguage());
@@ -244,7 +242,7 @@ if (is_object($uo)) {
             	<tr>
                 	<th>
 						<span style="line-height:32px;"><?=t('Groups')?></span>
-                    	<a class="btn primary small ccm-button-v2-right" id="groupSelector" href="<?=REL_DIR_FILES_TOOLS_REQUIRED?>/user_group_selector.php?mode=groups" dialog-title="<?=t('Add Groups')?>" dialog-modal="false"><?=t('Add Group')?></a>
+                    	<a class="btn small ccm-button-v2-right" id="groupSelector" href="<?=REL_DIR_FILES_TOOLS_REQUIRED?>/user_group_selector.php?mode=groups" dialog-title="<?=t('Add Groups')?>" dialog-modal="false"><?=t('Add Group')?></a>
                     </th>
                 </tr>
 			</thead>
@@ -280,6 +278,13 @@ if (is_object($uo)) {
         
         <input type="hidden" name="edit" value="1" />
 
+    <div class="well">
+    	<? print $ih->button(t('Back'), $this->url('/dashboard/users/search?uID=' . intval($_GET['uID'])), 'left')?>
+		<? print $ih->submit(t('Update User'), 'update', 'right', 'primary')?>
+    </div>
+
+		</form>
+		
 		<table border="0" cellspacing="0" cellpadding="0" width="100%" class="zebra-striped inputs-list">
         	<thead>
             	<tr>
@@ -302,13 +307,6 @@ if (is_object($uo)) {
 		</table>
 		
 	</div>
-    
-    <div class="ccm-pane-footer">
-    	<? print $ih->button(t('Back'), $this->url('/dashboard/users/search?uID=' . intval($_GET['uID'])), 'left')?>
-		<? print $ih->submit(t('Update User'), 'update', 'right', 'primary')?>
-    </div>
-    
-	</form>
     
     <!-- END User Edit Page -->
     

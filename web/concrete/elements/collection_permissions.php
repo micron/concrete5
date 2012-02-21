@@ -177,7 +177,9 @@ $saveMsg = t('Save permissions first.');
 			<option value="datetime"><?=t('Timed Release Settings')?></option>
 		  </select>
 
-		<a class="btn ccm-button-right dialog-launch" href="<?=REL_DIR_FILES_TOOLS_REQUIRED?>/user_group_selector.php?cID=<?=$_REQUEST['cID']?>" dialog-modal="false" dialog-width="90%" dialog-title="<?=t('Add User/Group')?>"  dialog-height="70%"><?=t('Add User/Group')?></a>
+		
+		<a class="btn ccm-button-right dialog-launch" href="<?=REL_DIR_FILES_TOOLS_REQUIRED?>/users/search_dialog?mode=choose_multiple&cID=<?=$_REQUEST['cID']?>" dialog-modal="false" dialog-width="90%" dialog-title="<?=t('Add User')?>"  dialog-height="70%"><?=t('Add User')?></a>
+		<a class="btn ccm-button-right dialog-launch" style="margin-right: 5px" href="<?=REL_DIR_FILES_TOOLS_REQUIRED?>/select_group?cID=<?=$_REQUEST['cID']?>" dialog-modal="false" dialog-title="<?=t('Add Group')?>"><?=t('Add Group')?></a>
 
 		</div>
 
@@ -278,7 +280,8 @@ $saveMsg = t('Save permissions first.');
 				<? } ?>
 				
 			<div class="dialog-buttons">
-				<a href="javascript:void(0)" class="btn primary" onclick="$('form[name=ccmPermissionsForm]').submit()"><?=t('Save')?></a>
+				<a href="javascript:void(0)" onclick="jQuery.fn.dialog.closeTop();" class="ccm-button-left btn"><?=t('Cancel')?></a>
+				<a href="javascript:void(0)" class="btn primary ccm-button-right" onclick="$('form[name=ccmPermissionsForm]').submit()"><?=t('Save')?></a>
 			</div>	
 			<input type="hidden" name="update_permissions" value="1" class="accept">
 			<input type="hidden" name="processCollection" value="1">

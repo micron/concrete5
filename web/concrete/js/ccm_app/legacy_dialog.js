@@ -19,7 +19,10 @@ jQuery.fn.dialog = function() {
 			var title = $(this).attr('dialog-title');
 			var onOpen = $(this).attr('dialog-on-open');
 			var onDestroy = $(this).attr('dialog-on-destroy');
-			var appendButtons = $(this).attr('dialog-append-buttons');
+			/*
+			 * no longer necessary. we auto detect
+				var appendButtons = $(this).attr('dialog-append-buttons');
+			*/
 			var onClose = $(this).attr('dialog-on-close');
 			obj = {
 				modal: true,
@@ -27,7 +30,6 @@ jQuery.fn.dialog = function() {
 				width: width,
 				height: height,
 				title: title,
-				appendButtons: appendButtons,
 				onOpen: onOpen,
 				onDestroy: onDestroy,
 				onClose: onClose
@@ -55,13 +57,17 @@ jQuery.fn.dialog.open = function(obj) {
 	if (typeof(obj.width) == 'string') {
 		if (obj.width.indexOf('%', 0) > 0) {
 			w = obj.width.replace('%', '');
-			h = obj.height.replace('%', '');
-			h = $(window).height() * (h / 100);
 			w = $(window).width() * (w / 100);
-			h = h + 100;
 			w = w + 50;
 		} else {
 			w = parseInt(obj.width) + 50;
+		}
+		
+		if (obj.height.indexOf('%', 0) > 0) {
+			h = obj.height.replace('%', '');
+			h = $(window).height() * (h / 100);
+			h = h + 100;
+		} else {
 			h = parseInt(obj.height) + 100;
 		}
 	} else if (obj.width) { 
@@ -70,11 +76,6 @@ jQuery.fn.dialog.open = function(obj) {
 	} else {
 		w = 550;
 		h = 400;
-	}
-	if (obj.appendButtons) {
-		var buttons = [{}];
-	} else {
-		var buttons = false;
 	}
 	if (h > $(window).height()) {
 		h = $(window).height();
@@ -89,7 +90,6 @@ jQuery.fn.dialog.open = function(obj) {
 		easing:"easeInExpo"
 		},
 		'escapeClose': true,
-		'buttons': buttons,
 		'title': obj.title,
 		'open': function() {
 			$("body").css("overflow", "hidden");
@@ -130,20 +130,23 @@ jQuery.fn.dialog.open = function(obj) {
 					jQuery.fn.dialog.closeTop();
 				});
 				if ($("#ccm-dialog-content" + nd + " .dialog-buttons").length > 0) {
-					$("#ccm-dialog-content" + nd).parent().find('.ui-dialog-buttonpane').addClass("ccm-ui");
-					$("#ccm-dialog-content" + nd + " .dialog-buttons").appendTo($("#ccm-dialog-content" + nd).parent().find('.ui-dialog-buttonpane').html(''));
-					$("#ccm-dialog-content" + nd + " .dialog-buttons").remove();
+					$("#ccm-dialog-content" + nd).jqdialog('option', 'buttons', [{}]);
+					$("#ccm-dialog-content" + nd + " .dialog-buttons").appendTo($("#ccm-dialog-content" + nd).parent().find('.ui-dialog-buttonpane').addClass("ccm-ui"));
 				}
 				if ($("#ccm-dialog-content" + nd + " .dialog-help").length > 0) {
-					var dataContent = $("#ccm-dialog-content" + nd + " .dialog-help").html();
-					$("#ccm-dialog-content" + nd + " .dialog-help").remove();
+					$("#ccm-dialog-content" + nd + " .dialog-help").hide();
 					if (ccmi18n.helpPopup) {
 						var helpText = ccmi18n.helpPopup;
 					} else {
 						var helpText = 'Help';
 					}
-					$("#ccm-dialog-content" + nd).parent().find('.ui-dialog-titlebar').append('<span class="ccm-dialog-help"><a href="javascript:void(0)" onclick="ccm_togglePageHelp(event, this)" title="' + helpText + '" data-content="' + dataContent + '">Help</a></span>');
-				    $("span.ccm-dialog-help a").popover({placement: 'below', html: true, trigger: 'manual'});
+					$("#ccm-dialog-content" + nd).parent().find('.ui-dialog-titlebar').append('<span class="ccm-dialog-help"><a href="javascript:void(0)" onclick="ccm_togglePopover(event, this)" title="' + helpText + '" id="ccm-menu-help">Help</a></span>');
+					$("#ccm-menu-help").popover({content: function() {
+						var id = $(this).attr('id') + '-content';
+						return $('#' + id).html();
+						
+					}, placement: 'below', html: true, trigger: 'manual'});
+
 					
 				}
 				if (typeof obj.onOpen != "undefined") {

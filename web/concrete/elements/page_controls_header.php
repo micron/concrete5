@@ -3,11 +3,14 @@ defined('C5_EXECUTE') or die("Access Denied.");
 $valt = Loader::helper('validation/token');
 $token = '&' . $valt->getParameter();
 $html = Loader::helper('html');
+$dh = Loader::helper('concrete/dashboard');
 
 if (isset($cp)) {
-	if ($cp->canWrite() || $cp->canAddSubContent() || $cp->canAdminPage() || $cp->canApproveCollection()) {
+	if ($dh->canRead() || $cp->canWrite() || $cp->canAddSubContent() || $cp->canAdminPage() || $cp->canApproveCollection()) {
 
 ?>
+
+<style type="text/css">body {margin-top: 49px !important;} </style>
 
 <script type="text/javascript">
 <?
@@ -27,6 +30,7 @@ if (!$dh->inDashboard()) {
 	$this->addHeaderItem($html->javascript('jquery.js'));
 	$this->addFooterItem($html->javascript('jquery.ui.js'));
 	$this->addFooterItem($html->javascript('jquery.form.js'));
+	$this->addFooterItem($html->javascript('jquery.rating.js'));
 	$this->addFooterItem($html->javascript('ccm.app.js'));
 	if (ENABLE_PROGRESSIVE_PAGE_REINDEX && Config::get('DO_PAGE_REINDEX_CHECK')) {
 		$this->addHeaderItem('<script type="text/javascript">$(function() { ccm_doPageReindexing(); });</script>');
@@ -37,9 +41,9 @@ if (!$dh->inDashboard()) {
 		$this->addFooterItem($html->javascript('i18n/ui.datepicker-' . $dlocale . '.js'));
 		$this->addFooterItem('<script type="text/javascript">$(function() { jQuery.datepicker.setDefaults({dateFormat: \'yy-mm-dd\'}); });</script>');
 	}
-	if (!Config::get('SHOW_INTRODUCTION')) {
+	if (!Config::get('SEEN_INTRODUCTION')) {
 		$this->addHeaderItem('<script type="text/javascript">$(function() { ccm_showAppIntroduction(); });</script>');
-		Config::save('SHOW_INTRODUCTION', 1);
+		Config::save('SEEN_INTRODUCTION', 1);
 	}
 	$this->addFooterItem($html->javascript('tiny_mce/tiny_mce.js'));
 }

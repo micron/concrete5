@@ -1,4 +1,6 @@
-﻿<? defined('C5_EXECUTE') or die("Access Denied.");
+<?php 
+
+defined('C5_EXECUTE') or die("Access Denied.");
 class DashboardSystemEnvironmentInfoController extends DashboardBaseController {	
 	
 	public function get_environment_info() {

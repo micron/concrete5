@@ -28,31 +28,18 @@ class TextHelper {
 	function sanitizeFileSystem($handle, $leaveSlashes=false) {
 		$handle = trim($handle);
 		$handle = str_replace(PAGE_PATH_SEPARATOR, '-', $handle);
-		$searchMulti = array(
-			"ä",
-			"ö",
-			"ß",
-			"ü",
-			"æ",
-			"ø",
-			"å",
-			"é",
-			"è"	
+		$multi = array(
+			"ä"=>"ae",
+			"ö"=>"oe",
+			"ß"=>"ss",
+			"ü"=>"ue",
+			"æ"=>"ae",
+			"ø"=>"oe",
+			"å"=>"aa",
+			"é"=>"e",
+			"è"=>"e"	
 		);
-
-		$replaceMulti = array(
-			'ae',
-			'oe',
-			'ss',
-			'ue',
-			'ae',
-			'oe',
-			'aa',
-			'e',
-			'e'
-		);
-		
-		$handle = str_replace($searchMulti, $replaceMulti, $handle);
+		$handle = str_replace(array_keys($multi), array_values($multi), $handle);
 
 		$searchNormal = array("/[&]/", "/[\s]+/", "/[^0-9A-Za-z-_.]/", "/-+/");
 		$searchSlashes = array("/[&]/", "/[\s]+/", "/[^0-9A-Za-z-_.\/]/", "/-+/");
@@ -113,6 +100,13 @@ class TextHelper {
 	 */
 	public function entities($v){
 		return htmlentities( $v, ENT_COMPAT, APP_CHARSET); 
+	}
+	
+	/** 
+	 * A concrete5 specific version of htmlspecialchars(). Double encoding is OFF, and the character set is set to your site's.
+	 */
+	public function specialchars($v) {
+		return htmlspecialchars($v, ENT_COMPAT, APP_CHARSET, false);
 	}
 	 
 	 
@@ -273,6 +267,40 @@ class TextHelper {
 	public function handle($handle, $leaveSlashes=false) {
 		return $this->sanitizeFileSystem($handle, $leaveSlashes=false);
 	}
+	
+	/**
+	 * shortens a string without breaking words
+	 * @param string $textStr
+	 * @param int $numChars
+	 * @param string $tail
+	 * @return string
+	 */
+	public function wordSafeShortText($textStr, $numChars=255, $tail='...') {
+		if (intval($numChars)==0) $numChars=255;
+		$textStr = trim(strip_tags($textStr));
+		
+		if (strlen($textStr) > $numChars) { 
+			$words = explode(" ",$textStr);
+			$length = 0;
+			$trimmed = "";
+			if(is_array($words) && count($words) > 1) {
+				foreach($words as $w) {
+					$length += strlen($w);
+					if($length >= $numChars) {
+						break;
+					} else {
+						$trimmed .= $w." ";
+						$length+=1;
+					}
+				}
+				$textStr = trim($trimmed).$tail;
+			} else { // no spaces or something...
+				$textStr = self::shortText($textStr,$numChars,$tail);
+			}
+		}
+		return $textStr;
+	}
+
 	
 	/**
 	 * Strips out non-alpha-numeric characters

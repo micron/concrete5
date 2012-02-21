@@ -41,7 +41,7 @@ class Page extends Collection {
 			$version = CollectionVersion::getNumericalVersionID($cID, $versionOrig);
 		}
 		$ca = new Cache();
-		$c = ($version > 0) ? $ca->get('page', $cID . ':' . $version) : $ca->get('page', $cID);
+		$c = ($version > 0) ? $ca->get(strtolower($class), $cID . ':' . $version) : $ca->get(strtolower($class), $cID);
 
 		if ($c instanceof $class) {
 			return $c;
@@ -53,9 +53,9 @@ class Page extends Collection {
  
 		// must use cID instead of c->getCollectionID() because cID may be the pointer to another page		
 		if ($version > 0) {
-			$ca->set('page', $cID . ':' . $version, $c);
+			$ca->set(strtolower($class), $cID . ':' . $version, $c);
 		} else {
-			$ca->set('page', $cID, $c);
+			$ca->set(strtolower($class), $cID, $c);
 		}
 		return $c;
 	}
@@ -1238,7 +1238,9 @@ class Page extends Collection {
 			}
 		}
 		// run any internal event we have for page update
-		$this->reindex();
+		// i don't think we need to do this because approve reindexes
+		//$this->reindex();
+		parent::refreshCache();
 		$ret = Events::fire('on_page_update', $this);
 	}
 	
@@ -1479,6 +1481,7 @@ class Page extends Collection {
 		if (!$this->isActive()) {
 			$this->activate();
 		}
+		$this->rescanSystemPageStatus();
 		// run any event we have for page move. Arguments are
 		// 1. current page being moved
 		// 2. former parent
@@ -1717,7 +1720,7 @@ class Page extends Collection {
 	function clearPendingAction() {
 		$db = Loader::db();
 		$cID = $this->getCollectionID();
-		$q = "update Pages set cPendingAction = null, cPendingActionUID = null, cPendingActionDatetime = null where cID = {$cID}";
+		$q = "update Pages set cPendingAction = null, cPendingActionUID = null, cPendingActionDatetime = 0 where cID = {$cID}";
 		$r = $db->query($q);
 		parent::refreshCache();
 	}
@@ -1744,6 +1747,7 @@ class Page extends Collection {
 		$trash = Page::getByPath(TRASH_PAGE_PATH);
 		$this->move($trash);
 		$this->deactivate();
+		$this->clearPendingAction();
 	}
 
 	function rescanChildrenDisplayOrder() {
@@ -1880,19 +1884,27 @@ class Page extends Collection {
 			
 			if ($res3) {
 				$np = Page::getByID($cID, $row['cvID']);
-				// now we mark the page as a system page based on this path:
-				$systemPages=array('/login', '/register', '/!trash', '/!stacks', '/!drafts', '/!trash/*', '/!stacks/*', '/!drafts/*', '/download_file', '/profile', '/dashboard', '/profile/*', '/dashboard/*','/page_forbidden','/page_not_found','/members'); 
-				$th = Loader::helper('text');
-				foreach($systemPages as $sp) {
-					if ($th->fnmatch($sp, $newPath)) {
-						$db->Execute('update Pages set cIsSystemPage = 1 where cID = ?', array($cID));
-					}
-				}				
+				$np->rescanSystemPageStatus();
 				$np->refreshCache();
 				return $newPath;
 			}
 		}
 		$r->free();
+	}
+	
+	public function rescanSystemPageStatus() {
+		$cID = $this->getCollectionID();
+		$db = Loader::db();
+		$newPath = $db->GetOne('select cPath from PagePaths where cID = ? and ppIsCanonical = 1', array($cID));
+		// now we mark the page as a system page based on this path:
+		$systemPages=array('/login', '/register', '/!trash', '/!stacks', '/!drafts', '/!trash/*', '/!stacks/*', '/!drafts/*', '/download_file', '/profile', '/dashboard', '/profile/*', '/dashboard/*','/page_forbidden','/page_not_found','/members'); 
+		$th = Loader::helper('text');
+		$db->Execute('update Pages set cIsSystemPage = 0 where cID = ?', array($cID));
+		foreach($systemPages as $sp) {
+			if ($th->fnmatch($sp, $newPath)) {
+				$db->Execute('update Pages set cIsSystemPage = 1 where cID = ?', array($cID));
+			}
+		}				
 	}
 	
 	public function isInTrash() {
@@ -2355,6 +2367,7 @@ class Page extends Collection {
 			// run any internal event we have for page addition
 			Events::fire('on_page_add', $pc);
 			$pc->rescanCollectionPath();
+
 
 		}
 		

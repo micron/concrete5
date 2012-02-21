@@ -7,6 +7,7 @@ class Marketplace {
 	const E_INVALID_BASE_URL = 20;
 	const E_MARKETPLACE_SUPPORT_MANUALLY_DISABLED = 21;
 	const E_UNRECOGNIZED_SITE_TOKEN = 22;
+	const E_DELETED_SITE_TOKEN = 31;
 	const E_GENERAL_CONNECTION_ERROR = 99;
 
 	protected $isConnected = false;
@@ -40,6 +41,11 @@ class Marketplace {
 			} else if ($vn->integer($r)) {
 				$this->isConnected = false;
 				$this->connectionError = $r;
+				
+				if ($this->connectionError == Marketplace::E_DELETED_SITE_TOKEN) {
+					Config::clear('MARKETPLACE_SITE_TOKEN');
+					Config::clear('MARKETPLACE_SITE_URL_TOKEN');					
+				}
 			} else {
 				$this->isConnected = false;
 				$this->connectionError = self::E_GENERAL_CONNECTION_ERROR;
@@ -82,6 +88,9 @@ class Marketplace {
 		if (empty($pkg)) {
 			return Package::E_PACKAGE_DOWNLOAD;
 		}
+		if ($pkg == Package::E_PACKAGE_INVALID_APP_VERSION) {
+			return Package::E_PACKAGE_INVALID_APP_VERSION;
+		}
 
 		$file = time();
 		// Use the same method as the Archive library to build a temporary file name.
@@ -97,14 +106,13 @@ class Marketplace {
 		return $file;
 	}
 	
-	public function getMarketplaceFrame($width = '100%', $height = '300', $completeURL = false) {
+	public function getMarketplaceFrame($width = '100%', $height = '300', $completeURL = false, $connectMethod = 'view') {
 		// if $mpID is passed, we are going to either
 		// a. go to its purchase page
 		// b. pass you through to the page AFTER connecting.
 		$tp = new TaskPermission();
 		if ($tp->canInstallPackages()) {
 			if (!$this->isConnected()) {
-				$url = MARKETPLACE_URL_CONNECT;
 				if (!$completeURL) {
 					$completeURL = BASE_URL . View::url('/dashboard/extend/connect', 'connect_complete');
 				}
@@ -112,11 +120,17 @@ class Marketplace {
 				$csiURL = urlencode(BASE_URL . DIR_REL);
 				$csiBaseURL = urlencode(BASE_URL);
 				if ($this->hasConnectionError()) {
-					$csToken = $this->getSiteToken();
+					if ($this->connectionError == E_DELETED_SITE_TOKEN) {
+						$connectMethod = 'view';
+						$csToken = Marketplace::generateSiteToken();
+					} else { 
+						$csToken = $this->getSiteToken();
+					}
 				} else {
 					// new connection 
 					$csToken = Marketplace::generateSiteToken();
 				}
+				$url = MARKETPLACE_URL_CONNECT . '/-/' . $connectMethod;
 				$url = $url . '?ts=' . time() . '&csiBaseURL=' . $csiBaseURL . '&csiURL=' . $csiURL . '&csToken=' . $csToken . '&csReferrer=' . $csReferrer . '&csName=' . htmlspecialchars(SITE, ENT_QUOTES, APP_CHARSET);
 			} else {
 				$csiBaseURL = urlencode(BASE_URL);
@@ -140,7 +154,7 @@ class Marketplace {
 					}, \'' . CONCRETE5_ORG_URL . '\');	
 				});	
 				</script>';
-				$ifr .= '<iframe id="ccm-marketplace-frame-' . $time . '" frameborder="0" width="' . $width . '" height="' . $height . '" src="' . $url . '"></iframe>';
+				$ifr .= '<iframe class="ccm-marketplace-frame-connect" id="ccm-marketplace-frame-' . $time . '" frameborder="0" width="' . $width . '" height="' . $height . '" src="' . $url . '"></iframe>';
 				return $ifr;
 			}
 		} else {
@@ -173,10 +187,10 @@ class Marketplace {
 					$("#ccm-marketplace-frame-' . $time . '").attr("height", eh); 
 				}
 				
-				}, \'' . CONCRETE5_ORG_URL . '\');	
+				}, \'' . CONCRETE5_ORG_URL_SECURE . '\');	
 			});	
 			</script>';
-			$ifr .= '<iframe id="ccm-marketplace-frame-' . $time . '" class="ccm-marketplace-frame" frameborder="0" width="' . $width . '" height="' . $height . '" src="' . $url . '"></iframe>';
+			$ifr .= '<iframe class="ccm-marketplace-frame" id="ccm-marketplace-frame-' . $time . '" class="ccm-marketplace-frame" frameborder="0" width="' . $width . '" height="' . $height . '" src="' . $url . '"></iframe>';
 			return $ifr;
 		} else {
 			return '<div class="ccm-error">' . t('You do not have permission to connect this site to the marketplace.') . '</div>';

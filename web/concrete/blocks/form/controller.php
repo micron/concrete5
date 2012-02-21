@@ -355,8 +355,23 @@ class FormBlockController extends BlockController {
 			}
 			$refer_uri=$_POST['pURI'];
 			if(!strstr($refer_uri,'?')) $refer_uri.='?';			
+			$foundSpam = false;
 			
-			if(intval($this->notifyMeOnSubmission)>0){	
+			$submittedData = '';
+			foreach($questionAnswerPairs as $questionAnswerPair){
+				$submittedData .= $questionAnswerPair['question']."\r\n".$questionAnswerPair['answer']."\r\n"."\r\n";
+			} 
+			$antispam = Loader::helper('validation/antispam');
+			if (!$antispam->check($submittedData, 'form_block')) { 
+				// found to be spam. We remove it
+				$foundSpam = true;
+				$q="delete from {$this->btAnswerSetTablename} where asID = ?";
+				$v = array($this->lastAnswerSetId);
+				$db->Execute($q, $v);
+				$db->Execute('delete from {$this->btAnswersTablename} where asID = ?', array($this->lastAnswerSetId));
+			}
+			
+			if(intval($this->notifyMeOnSubmission)>0 && !$foundSpam){	
 				
 				if( strlen(FORM_BLOCK_SENDER_EMAIL)>1 && strstr(FORM_BLOCK_SENDER_EMAIL,'@') ){
 					$formFormEmailAddress = FORM_BLOCK_SENDER_EMAIL;  
@@ -651,13 +666,12 @@ class MiniSurvey{
 				
 				if($surveyBlockInfo['displayCaptcha']) {
 				  echo '<tr><td colspan="2">';
-   				echo(t('Please type the letters and numbers shown in the image.'));	
+   				$captcha = Loader::helper('validation/captcha');				
+				echo $captcha->label();
    				echo '</td></tr><tr><td>&nbsp;</td><td>';
    				
-   				$captcha = Loader::helper('validation/captcha');				
+   				$captcha->showInput();
    				$captcha->display();
-   				print '<br/>';
-   				$captcha->showInput();		
    
    				//echo isset($errors['captcha'])?'<span class="error">' . $errors['captcha'] . '</span>':'';
 				  echo '</td></tr>';

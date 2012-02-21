@@ -34,7 +34,7 @@ if($success) {
 <div class="row">
 <div class="span8 columns">
 	<fieldset>
-		<legend>Your Details</legend>
+		<legend><?=t('Your Details')?></legend>
 		<? if ($displayUserName) { ?>
 			<div class="clearfix">
 				<?= $form->label('uName',t('Username')); ?>
@@ -82,11 +82,13 @@ if($success) {
 	<? if (ENABLE_REGISTRATION_CAPTCHA) { ?>
 	
 		<div class="clearfix">
-			<?=$form->label('captcha', t('Please type the letters and numbers shown in the image.')); ?>
+			<?php $captcha = Loader::helper('validation/captcha'); ?>			
+			<?=$captcha->label()?>
 			<div class="input">
-				<?php $captcha = Loader::helper('validation/captcha');				
-					  $captcha->display();?> </br>
-				     <?php $captcha->showInput();?>  
+			<?
+		  	  $captcha->showInput(); 
+			  $captcha->display();
+		  	  ?>
 			</div>
 		</div>
 	
