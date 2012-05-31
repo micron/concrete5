@@ -1,5 +1,10 @@
 <?
 	defined('C5_EXECUTE') or die("Access Denied.");
+
+	if (!Loader::helper('validation/numbers')->integer($_GET['cID'])) {
+		die(t('Access Denied'));
+	}
+
 	$valt = Loader::helper('validation/token');
 	$fh = Loader::helper('file');
 	
@@ -70,7 +75,7 @@
 			file_put_contents($fh->getTemporaryDirectory() . '/' . $src2, $ret);
 			
 			if (is_executable(DIR_FILES_BIN_HTMLDIFF)) {
-				$val = system(DIR_FILES_BIN_HTMLDIFF . ' ' . $fh->getTemporaryDirectory() . '/' . $src1 . ' ' . $fh->getTemporaryDirectory() . '/' . $src2);
+				$val = system(DIR_FILES_BIN_HTMLDIFF . ' ' . escapeshellcmd($fh->getTemporaryDirectory() . '/' . $src1) . ' ' . escapeshellcmd($fh->getTemporaryDirectory() . '/' . $src2));
 				$val = str_replace($val, '</head>', '<style type="text/css">@import "' . ASSETS_URL_CSS . '/ccm.compare.css";</style></head>');
 				print $val;
 			} else {
